@@ -14,8 +14,38 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Able Pro Tailwind - Next.js",
-  description: "Ported Able Pro Tailwind to Next.js",
+  title: "Asrul Nur Rahim - Front-End Engineer",
+  description:
+    "Personal website of Asrul Nur Rahim, a Front-End Engineer and UI Architect.",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "icon",
+        url: "/favicon-96x96.png",
+        sizes: "96x96",
+        type: "image/png",
+      },
+      {
+        rel: "icon",
+        url: "/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        rel: "icon",
+        url: "/favicon-128x128.png",
+        sizes: "128x128",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default async function RootLayout({
