@@ -45,7 +45,6 @@ export default function AboutPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col pt-20">
-      <Navbar />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -178,7 +177,6 @@ export default function AboutPage() {
           </a>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

@@ -34,13 +34,14 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-4">
               {/* <img src="/assets/images/logo-dark.svg" alt="image" className="img-fluid mb-4" /> */}
-              <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">
-                Able Pro
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] animate-[move-bg_20s_linear_infinite] mb-2">
+                Asrul Nur Rahim
               </h2>
               <p className="mb-5 text-slate-500 dark:text-slate-400">
-                Phoenixcoded has gained the trust of over 5.5K+ customers since
-                2015, thanks to our commitment to delivering high-quality
-                products.
+                Experienced in building clean, precise, and visually consistent
+                web interfaces. Focused on performance, SEO best practices,
+                semantic HTML, metadata, schema markup, and page speed
+                optimization using tools like Google Search Console.
               </p>
             </div>
 
@@ -131,12 +132,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="text-slate-500 dark:text-slate-400 text-center sm:text-left">
-            <p className="mb-0">
-              © Handcrafted by Team{" "}
-              <Link href="#" className="text-primary hover:underline">
-                Phoenixcoded
-              </Link>
-            </p>
+            <p className="mb-0">© Handcrafted by Asrul Nur Rahim</p>
           </div>
           <div className="flex gap-4">
             <Link
