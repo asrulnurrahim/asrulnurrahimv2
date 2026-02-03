@@ -3,11 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, ExternalLink } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle"; // Assuming I need to move ThemeToggle to a shared place or use the one I created?
-// I created it in src/components/theme-provider.tsx? No, wait.
-// Step 125 created src/components/theme-provider.tsx.
-// Step 39 showed src/components/ui/theme-toggle.tsx in asrulnurrahim.
-// I didn't verify if I copied theme-toggle.tsx. I should check or create it.
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,9 +14,7 @@ export function Navbar() {
         <div className="flex py-4 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              {/* Using the logo from assets if available, or text for now */}
-              {/* <img className="h-7 w-auto" src="/assets/images/logo-dark.svg" alt="Able Pro" /> */}
-              <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#32424A] via-[#4586FF] to-[#01ECD5] bg-[length:400%_100%] animate-[move-bg_24s_infinite_linear]">
+              <span className="text-xl font-bold text-transparent bg-clip-text bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] animate-[move-bg_20s_linear_infinite]">
                 Asrul Nur Rahim
               </span>
             </Link>
@@ -32,7 +26,7 @@ export function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-4">
             <Link
-              href="#"
+              href="/about"
               className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
             >
               About/CV
@@ -101,8 +95,36 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-          {/* Mobile menu items... */}
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col gap-4">
+          <Link
+            href="/about"
+            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            About/CV
+          </Link>
+          <Link
+            href="#"
+            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Projects
+          </Link>
+          <Link
+            href="#"
+            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Blog
+          </Link>
+          <Link
+            href="https://phoenixcoded.gitbook.io/able-pro"
+            target="_blank"
+            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Contact
+          </Link>
         </div>
       )}
     </nav>

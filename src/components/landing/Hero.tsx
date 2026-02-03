@@ -21,7 +21,7 @@ export function Hero() {
           </div>
           <h1 className="text-[22px] md:text-[36px] lg:text-[55px] leading-[1.2] mb-5 font-bold text-slate-900 dark:text-white">
             Front-End Developer —
-            <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-[#32424A] via-[#4586FF] to-[#01ECD5] bg-[length:400%_100%] animate-[move-bg_24s_infinite_linear] mx-2">
+            <span className="block sm:inline text-transparent bg-clip-text bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] animate-[move-bg_20s_linear_infinite] mx-2">
               Every Pixel Matters.
             </span>
           </h1>

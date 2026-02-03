@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"; // Assuming Inter was used as visible 
 // Actually I should have checked layout.tsx. I will check it in a sec, but for now I'll use basic and then can update.
 // Wait, I saw it in Step 11: import { Inter } from "next/font/google"; import { ThemeProvider } from "@/components/theme-provider"; import { cookies } from "next/headers"; import "./globals.css";
 
+import ClientLayout from "@/components/layout/ClientLayout";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cookies } from "next/headers";
 import "./globals.css";
@@ -59,7 +60,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${theme}`}>
       <body className="font-sans antialiased">
-        <ThemeProvider defaultTheme={theme}>{children}</ThemeProvider>
+        <ThemeProvider defaultTheme={theme}>
+          <ClientLayout>{children}</ClientLayout>
+        </ThemeProvider>
       </body>
     </html>
   );
