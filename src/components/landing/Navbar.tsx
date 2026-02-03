@@ -9,6 +9,17 @@ import { UserMenu } from "@/components/layout/UserMenu";
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const navLinks = [
+    { href: "/about", label: "About" },
+    { href: "#", label: "Projects" },
+    { href: "#", label: "Blogs" },
+    {
+      href: "https://phoenixcoded.gitbook.io/able-pro",
+      label: "Contact",
+      external: true,
+    },
+  ];
+
   return (
     <nav className="fixed top-0 z-50 w-full backdrop-blur shadow-[0_0_24px_rgba(27,46,94,.05)] dark:shadow-[0_0_24px_rgba(27,46,94,.05)] bg-white/75 dark:bg-slate-900/75 transition-colors">
       <div className="container mx-auto px-4">
@@ -25,32 +36,17 @@ export function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-4">
-            <Link
-              href="/about"
-              className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="#"
-              className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            >
-              Projects
-            </Link>
-            <Link
-              href="#"
-              className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            >
-              Blogs
-            </Link>
-            <Link
-              href="https://phoenixcoded.gitbook.io/able-pro"
-              target="_blank"
-              className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            >
-              Contact
-            </Link>
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
@@ -70,37 +66,19 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col gap-4">
-          <Link
-            href="/about"
-            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            About
-          </Link>
-          <Link
-            href="#"
-            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Projects
-          </Link>
-          <Link
-            href="#"
-            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Blogs
-          </Link>
-          <Link
-            href="https://phoenixcoded.gitbook.io/able-pro"
-            target="_blank"
-            className="text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-primary font-medium transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Contact
-          </Link>
-          <div className="flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col gap-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              target={link.external ? "_blank" : undefined}
+              className="px-4 py-3 text-base font-medium text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
               Theme:
             </span>
