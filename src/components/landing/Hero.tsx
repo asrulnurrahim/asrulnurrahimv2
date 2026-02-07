@@ -3,8 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { Profile } from "@/lib/types";
 
-export function Hero() {
+export function Hero({ profile }: { profile: Profile | null }) {
   return (
     <header
       id="home"
@@ -14,13 +15,13 @@ export function Hero() {
         <div className="w-full md:w-10/12 text-center mx-auto">
           <div className="mb-6 flex justify-center">
             <img
-              src="/me-2.webp"
-              alt="Asrul Nur Rahim"
+              src={profile?.avatar_url || "/me-2.webp"}
+              alt={profile?.full_name || "Asrul Nur Rahim"}
               className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover shadow-lg border-4 border-white dark:border-slate-800"
             />
           </div>
           <h1 className="text-[22px] md:text-[36px] lg:text-[55px] leading-[1.2] mb-5 font-bold text-slate-900 dark:text-white">
-            Front-End Developer —
+            {profile?.headline || "Front-End Developer"} —
             <span className="block sm:inline text-transparent bg-clip-text bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] animate-[move-bg_20s_linear_infinite] mx-2">
               Every Pixel Matters.
             </span>

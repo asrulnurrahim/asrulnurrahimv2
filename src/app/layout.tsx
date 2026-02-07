@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Assuming Inter was used as visible in previous context, though not explicitly in what I read just now. I'll stick to basic.
-// Actually I should have checked layout.tsx. I will check it in a sec, but for now I'll use basic and then can update.
-// Wait, I saw it in Step 11: import { Inter } from "next/font/google"; import { ThemeProvider } from "@/components/theme-provider"; import { cookies } from "next/headers"; import "./globals.css";
 
 import ClientLayout from "@/components/layout/ClientLayout";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cookies } from "next/headers";
 import "./globals.css";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -58,8 +56,8 @@ export default async function RootLayout({
   const theme = cookieStore.get("theme")?.value || "light";
 
   return (
-    <html lang="en" className={`${inter.variable} ${theme}`}>
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${theme} ${jakarta.variable}`}>
+      <body className="font-default text-text-default antialiased">
         <ThemeProvider defaultTheme={theme}>
           <ClientLayout>{children}</ClientLayout>
         </ThemeProvider>

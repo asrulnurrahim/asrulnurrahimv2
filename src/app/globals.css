@@ -25,6 +25,13 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+
+  /* Typography Settings */
+  --color-text-default: #202124;
+  --font-family-text: var(--font-jakarta), sans-serif;
+
+  /* Map default sans to new font */
+  --font-family-sans: var(--font-family-text);
 }
 
 @layer base {
@@ -43,6 +50,7 @@
     /* Primary: #4586FF */
     --primary: #4586ff;
     --primary-foreground: #ffffff;
+    --primary-hover: #357cff;
 
     /* Secondary: #01ECD5 */
     --secondary: #01ecd5;
@@ -64,10 +72,6 @@
     --radius: 0.5rem;
 
     --border-transparent-color: rgba(0, 0, 0, 0.07);
-  }
-
-  .shadow-subtle {
-    box-shadow: var(--border-transparent-color) 0 1px;
   }
 
   .dark {
@@ -101,10 +105,49 @@
     --ring: #cbd5e1;
   }
 
+  html {
+    font-family: var(--font-family-text);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  div,
+  a,
+  li,
+  input,
+  button,
+  textarea,
+  select {
+    /* font-family: inherit; */
+    font-family: var(--font-family-text);
+  }
+
+  a {
+    color: var(--primary);
+  }
+
+  a {
+    color: var(--primary);
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--primary-hover);
+  }
+
+  .shadow-subtle {
+    box-shadow: var(--border-transparent-color) 0 1px;
+  }
+
   body {
     background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans), system-ui, sans-serif;
+    color: var(--color-text-default);
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
@@ -143,3 +186,9 @@
     background-position: 100% 50%;
   }
 }
+
+/* TinyMCE Overrides */
+.tox-promotion {
+  display: none !important;
+}
+

@@ -12,7 +12,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/about", label: "About" },
     { href: "#", label: "Projects" },
-    { href: "#", label: "Blogs" },
+    { href: "/blog", label: "Blogs" },
     {
       href: "https://phoenixcoded.gitbook.io/able-pro",
       label: "Contact",

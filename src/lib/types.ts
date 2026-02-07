@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   slug: string;
   created_at: string;
+  posts?: { count: number }[];
 }
 
 export interface Profile {
@@ -43,8 +44,9 @@ export interface Post {
   status: "draft" | "published";
   seo_title: string | null;
   seo_description: string | null;
-  category_id: string | null;
-  category?: Category | null; // Joined
+  category_id?: string | null; // Deprecated
+  category?: Category | null; // Deprecated
+  categories?: Category[]; // Many-to-Many
   author_id: string | null;
   author?: Profile | null; // Joined
   published_at: string | null;

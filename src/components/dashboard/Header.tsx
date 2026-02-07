@@ -13,6 +13,28 @@ export function Header({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const [profile, setProfile] = React.useState<{
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null>(null);
+
+  React.useEffect(() => {
+    const getProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url")
+          .eq("id", user.id)
+          .single();
+        setProfile(data);
+      }
+    };
+    getProfile();
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -58,17 +80,23 @@ export function Header({
 
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="flex items-center gap-3 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full lg:rounded-lg transition-colors outline-none">
-                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 overflow-hidden">
-                  <img
-                    src="/me-2.webp"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+              <button className="flex items-center gap-3 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full lg:rounded-lg transition-colors outline-none cursor-pointer">
+                <div className="relative w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-500">
+                      {profile?.full_name?.charAt(0) || "U"}
+                    </div>
+                  )}
                 </div>
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Administrator
+                    {profile?.full_name || "User"}
                   </p>
                 </div>
               </button>

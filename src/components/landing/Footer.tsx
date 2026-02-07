@@ -1,7 +1,14 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { Github, Youtube, Dribbble } from "lucide-react";
+import {
+  Github,
+  Youtube,
+  Dribbble,
+  Facebook,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
 
 export function Footer() {
   return (
@@ -40,9 +47,58 @@ export function Footer() {
               <p className="mb-5 text-slate-500 dark:text-slate-400">
                 Experienced in building clean, precise, and visually consistent
                 web interfaces. Focused on performance, SEO best practices,
-                semantic HTML, metadata, schema markup, and page speed
                 optimization using tools like Google Search Console.
               </p>
+              <div className="flex gap-4 mt-6">
+                <Link
+                  href="https://facebook.com"
+                  target="_blank"
+                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                >
+                  <Facebook size={20} />
+                </Link>
+                <Link
+                  href="https://instagram.com"
+                  target="_blank"
+                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                >
+                  <Instagram size={20} />
+                </Link>
+                <Link
+                  href="https://linkedin.com"
+                  target="_blank"
+                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                >
+                  <Linkedin size={20} />
+                </Link>
+                <Link
+                  href="https://tiktok.com"
+                  target="_blank"
+                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-music-2"
+                  >
+                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                  </svg>
+                </Link>
+                <Link
+                  href="https://youtube.com"
+                  target="_blank"
+                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                >
+                  <Youtube size={20} />
+                </Link>
+              </div>
             </div>
 
             <div className="md:col-span-8">

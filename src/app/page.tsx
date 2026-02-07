@@ -6,11 +6,16 @@ import { Hero } from "@/components/landing/Hero";
 // import { Testimonials } from "@/components/landing/Testimonials";
 import { PortfolioSection } from "@/components/landing/PortfolioSection";
 import { BlogSection } from "@/components/landing/BlogSection";
+import { getOwnerProfile } from "@/services/db";
 
-export default function Home() {
+export const revalidate = 60; // Revalidate every minute
+
+export default async function Home() {
+  const profile = await getOwnerProfile();
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
-      <Hero />
+      <Hero profile={profile} />
       {/* <Technologies /> */}
       {/* <FeatureCombo /> */}
       <PortfolioSection />

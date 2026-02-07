@@ -11,8 +11,13 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 export function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<{
+    full_name: string | null;
+    avatar_url: string | null;
+    headline: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false); // Used for Chevron rotation
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -22,6 +27,15 @@ export function UserMenu() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url, headline")
+          .eq("id", user.id)
+          .single();
+        setProfile(data);
+      }
       setLoading(false);
     };
 
@@ -29,8 +43,18 @@ export function UserMenu() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url, headline")
+          .eq("id", session.user.id)
+          .single();
+        setProfile(data);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => {
@@ -51,20 +75,24 @@ export function UserMenu() {
       <DropdownMenu.Trigger asChild>
         <button className="flex items-center gap-3 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full lg:rounded-lg transition-colors outline-none cursor-pointer group">
           <div className="relative w-9 h-9 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
-            <Image
-              src="/me-2.webp"
-              alt="Profile"
-              fill
-              className="object-cover"
-              sizes="36px"
-            />
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center text-xs text-slate-500 font-bold">
+                {profile?.full_name?.charAt(0) || user.email?.charAt(0)}
+              </div>
+            )}
           </div>
           <div className="hidden xl:block text-left mr-1">
             <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">
-              Admin
+              {profile?.full_name || "User"}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-              Super User
+              {profile?.headline || "Member"}
             </p>
           </div>
           <div
@@ -85,7 +113,7 @@ export function UserMenu() {
         >
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 mb-1">
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              Asrul Nur Rahim
+              {profile?.full_name || "User"}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               {user.email}
