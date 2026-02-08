@@ -1,4 +1,4 @@
-import { getPosts, getCategories, getRecentPosts } from "@/services/db";
+import { getPosts, getCategories, getPopularPosts } from "@/services/db";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 
@@ -44,10 +44,10 @@ export default async function BlogPage({
   const search = params.search;
   const category = params.category;
 
-  const [posts, categories, recentPosts] = await Promise.all([
+  const [posts, categories, popularPosts] = await Promise.all([
     getPosts(search, category),
     getCategories(),
-    getRecentPosts(5),
+    getPopularPosts(5),
   ]);
 
   const jsonLd = {
@@ -186,35 +186,30 @@ export default async function BlogPage({
             {/* Search Widget */}
             <SearchInput />
 
-            {/* Recent Posts Widget */}
+            {/* Popular Posts Widget */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                Recent Posts
+                Popular Posts
               </h3>
               <div className="flex flex-col gap-4">
-                {recentPosts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="group"
-                  >
-                    <h4 className="text-[#32424a] dark:text-gray-300 font-medium group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-                      {post.title}
-                    </h4>
-                    <span className="text-xs text-gray-400 mt-1 block">
-                      {new Date(post.published_at!).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        },
-                      )}
-                    </span>
-                  </Link>
-                ))}
-                {recentPosts.length === 0 && (
-                  <p className="text-gray-500 text-sm">No recent posts.</p>
+                {popularPosts.length > 0 ? (
+                  popularPosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className="group"
+                    >
+                      <h4 className="text-[#32424a] dark:text-gray-300 font-medium group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                        {post.title}
+                      </h4>
+                      <div className="flex items-center text-xs text-gray-400 mt-1">
+                        <Eye className="w-3 h-3 mr-1" />
+                        {(post.views || 0).toLocaleString()} views
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-sm">No popular posts.</p>
                 )}
               </div>
             </div>

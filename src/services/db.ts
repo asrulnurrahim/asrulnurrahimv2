@@ -160,10 +160,13 @@ export const getRecentPosts = async (limit = 5) => {
     .order("published_at", { ascending: false })
     .limit(limit);
 
-  if (error) throw new Error(`Supabase error: ${error.message}`);
+  if (error) {
+    console.error("Error fetching recent posts:", error);
+    return [];
+  }
 
   // Transform
-  return (posts || []).map((post) => {
+  const result = (posts || []).map((post) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const p = post as any;
     return {
@@ -172,8 +175,46 @@ export const getRecentPosts = async (limit = 5) => {
       categories: p.post_cats
         .map((c: any) => c.category)
         .filter((c: any) => c !== null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      category: p.post_cats[0]?.category || null, // Backward compatibility
     };
   }) as Post[];
+
+  return result;
+};
+
+export const getPopularPosts = async (limit = 5) => {
+  const supabase = await createClient();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select(
+      "id, title, slug, published_at, views, post_cats:post_categories(category:categories(id, name, slug))",
+    )
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("views", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error fetching popular posts:", error);
+    return [];
+  }
+
+  const result = (posts || []).map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = post as any;
+    return {
+      ...p,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      categories: p.post_cats
+        .map((c: any) => c.category)
+        .filter((c: any) => c !== null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      category: p.post_cats[0]?.category || null, // Backward compatibility
+    };
+  }) as Post[];
+
+  return result;
 };
 
 export const getCategories = async () => {
