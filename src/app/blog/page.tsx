@@ -1,7 +1,6 @@
 import { getPosts, getCategories, getPopularPosts } from "@/services/db";
 import Link from "next/link";
 import { Eye } from "lucide-react";
-import { getCategoryColor } from "@/utils/colors";
 
 import SearchInput from "./components/SearchInput";
 
@@ -61,7 +60,7 @@ export default async function BlogPage({
       "@type": "Person",
       name: "Asrul Nur Rahim",
     },
-    blogPost: posts.map((post: any) => ({
+    blogPost: posts.map((post) => ({
       "@type": "BlogPosting",
       headline: post.title,
       datePublished: post.published_at,
@@ -89,7 +88,7 @@ export default async function BlogPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Content - Blog List */}
           <div className="lg:col-span-8 flex flex-col gap-6">
-            {posts.map((post: any) => (
+            {posts.map((post) => (
               <article
                 key={post.id}
                 className="relative group flex flex-col md:flex-row bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800"
@@ -117,20 +116,17 @@ export default async function BlogPage({
                 <div className="flex-1 p-6 flex flex-col justify-center">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     {post.categories && post.categories.length > 0 ? (
-                      post.categories.map((cat: any) => {
-                        const color = getCategoryColor(cat.slug);
-                        return (
-                          <Link
-                            key={cat.id}
-                            href={`/blog?category=${cat.slug}`}
-                            className={`relative z-10 inline-block px-3 py-1 rounded-full text-xs font-bold leading-none uppercase tracking-wider ${color.bg} ${color.text} ${color.darkBg} ${color.darkText} hover:opacity-80 transition-opacity`}
-                          >
-                            {cat.name}
-                          </Link>
-                        );
-                      })
+                      post.categories.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/blog?category=${cat.slug}`}
+                          className="relative z-10 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))
                     ) : (
-                      <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 uppercase tracking-wider">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         Uncategorized
                       </span>
                     )}
@@ -197,23 +193,21 @@ export default async function BlogPage({
               </h3>
               <div className="flex flex-col gap-4">
                 {popularPosts.length > 0 ? (
-                  popularPosts.map((post: any) => {
-                    return (
-                      <Link
-                        key={post.slug}
-                        href={`/blog/${post.slug}`}
-                        className="group"
-                      >
-                        <h4 className="text-[#32424a] dark:text-gray-300 font-medium group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-                          {post.title}
-                        </h4>
-                        <div className="flex items-center text-xs text-gray-400 mt-1">
-                          <Eye className="w-3 h-3 mr-1" />
-                          {(post.views || 0).toLocaleString()} views
-                        </div>
-                      </Link>
-                    );
-                  })
+                  popularPosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className="group"
+                    >
+                      <h4 className="text-[#32424a] dark:text-gray-300 font-medium group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                        {post.title}
+                      </h4>
+                      <div className="flex items-center text-xs text-gray-400 mt-1">
+                        <Eye className="w-3 h-3 mr-1" />
+                        {(post.views || 0).toLocaleString()} views
+                      </div>
+                    </Link>
+                  ))
                 ) : (
                   <p className="text-gray-500 text-sm">No popular posts.</p>
                 )}
@@ -228,51 +222,44 @@ export default async function BlogPage({
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/blog"
-                  className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+                  className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     !category
-                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-md ring-2 ring-gray-900/10 dark:ring-white/10"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                   }`}
                 >
-                  <span className="font-bold mr-1.5 uppercase tracking-wider text-[10px]">
-                    All
-                  </span>
+                  <span className="font-medium mr-1.5">All</span>
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+                    className={`text-xs px-1.5 py-0.5 rounded-md ${
                       !category
                         ? "bg-gray-700 text-gray-200 dark:bg-gray-200 dark:text-gray-700"
                         : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
                     }`}
                   >
                     {categories.reduce(
-                      (acc: number, cat: any) =>
-                        acc + (cat.posts?.[0]?.count || 0),
+                      (acc, cat) => acc + (cat.posts?.[0]?.count || 0),
                       0,
                     )}
                   </span>
                 </Link>
-                {categories.map((cat: any) => {
+                {categories.map((cat) => {
                   const isActive = category === cat.slug;
-                  const color = getCategoryColor(cat.slug);
-
                   return (
                     <Link
                       key={cat.id}
                       href={`/blog?category=${cat.slug}`}
-                      className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+                      className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors ${
                         isActive
-                          ? `${color.solid} text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-500/10`
-                          : `${color.bg} ${color.text} ${color.darkBg} ${color.darkText} hover:opacity-80`
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                       }`}
                     >
-                      <span className="font-bold mr-1.5 uppercase tracking-wider text-[10px]">
-                        {cat.name}
-                      </span>
+                      <span className="font-medium mr-1.5">{cat.name}</span>
                       <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+                        className={`text-xs px-1.5 py-0.5 rounded-md ${
                           isActive
-                            ? "bg-black/20 text-white"
-                            : "bg-black/5 text-inherit"
+                            ? "bg-blue-500 text-blue-50"
+                            : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
                         }`}
                       >
                         {cat.posts?.[0]?.count || 0}
