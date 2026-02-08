@@ -60,9 +60,12 @@ export async function BlogSection() {
                 {/* Meta: Category & Date */}
                 <div className="mb-4 flex items-center justify-between text-xs">
                   {post.category && (
-                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                    <Link
+                      href={`/blog?category=${post.category.slug}`}
+                      className="relative z-10 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                    >
                       {post.category.name}
-                    </span>
+                    </Link>
                   )}
                   <div className="flex items-center text-gray-500 dark:text-gray-400 gap-4">
                     <span className="flex items-center">

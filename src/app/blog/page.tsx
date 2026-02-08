@@ -91,13 +91,10 @@ export default async function BlogPage({
             {posts.map((post) => (
               <article
                 key={post.id}
-                className="flex flex-col md:flex-row bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800"
+                className="relative group flex flex-col md:flex-row bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-800"
               >
                 {/* Image Section */}
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="w-full md:w-1/3 min-w-[280px] md:max-w-[320px] relative group"
-                >
+                <div className="w-full md:w-1/3 min-w-[280px] md:max-w-[320px] relative">
                   <div className="aspect-video md:h-full w-full bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
                     {post.thumbnail ? (
                       <img
@@ -110,8 +107,10 @@ export default async function BlogPage({
                         <span className="text-5xl opacity-40">🖼️</span>
                       </div>
                     )}
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                </Link>
+                </div>
 
                 {/* Content Section */}
                 <div className="flex-1 p-6 flex flex-col justify-center">
@@ -121,7 +120,7 @@ export default async function BlogPage({
                         <Link
                           key={cat.id}
                           href={`/blog?category=${cat.slug}`}
-                          className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                          className="relative z-10 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
                         >
                           {cat.name}
                         </Link>
@@ -151,7 +150,13 @@ export default async function BlogPage({
                     className="text-xl md:text-2xl font-bold text-[#32424a] dark:text-white mb-3 hover:text-[#1e282d] dark:hover:text-blue-400 transition-colors line-clamp-2"
                     title={post.title}
                   >
-                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="focus:outline-none"
+                    >
+                      <span className="absolute inset-0" aria-hidden="true" />
+                      {post.title}
+                    </Link>
                   </h2>
 
                   <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed text-sm md:text-base">

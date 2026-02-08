@@ -14,6 +14,9 @@ import {
   Instagram,
 } from "lucide-react";
 import ViewCounter from "@/components/blog/ViewCounter";
+import { processContent } from "@/lib/toc";
+import TableOfContents from "@/components/blog/TableOfContents";
+import ArticleContent from "@/components/blog/ArticleContent";
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -117,13 +120,16 @@ export default async function BlogPostPage({ params }: Props) {
     },
   };
 
+  const { content, toc } = processContent(post.content || "");
+  const hasToc = toc.length >= 3;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-30 pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-7xl">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
           <Link
@@ -157,7 +163,7 @@ export default async function BlogPostPage({ params }: Props) {
         </nav>
 
         {/* Article Header */}
-        <header className="mb-10 text-center">
+        <header className="mb-10 text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-6 text-sm text-gray-500 dark:text-gray-400">
             {post.categories && post.categories.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center">
@@ -173,8 +179,7 @@ export default async function BlogPostPage({ params }: Props) {
                 ))}
               </div>
             )}
-            {/* import ViewCounter from &quot;@/components/blog/ViewCounter&quot;; // ...
-            existing imports // ... inside BlogPostPage component */}
+
             <span className="flex items-center">
               <Calendar className="w-4 h-4 mr-1.5" />
               {formattedDate}
@@ -201,7 +206,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* Featured Image */}
         {post.thumbnail ? (
-          <div className="aspect-video w-full bg-gray-100 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 relative shadow-sm">
+          <div className="aspect-video w-full bg-gray-100 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 relative shadow-sm max-w-5xl mx-auto">
             <img
               src={post.thumbnail}
               alt={post.title}
@@ -209,35 +214,86 @@ export default async function BlogPostPage({ params }: Props) {
             />
           </div>
         ) : (
-          <div className="aspect-video w-full bg-gray-200 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 flex items-center justify-center relative shadow-sm">
+          <div className="aspect-video w-full bg-gray-200 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 flex items-center justify-center relative shadow-sm max-w-5xl mx-auto">
             <span className="text-6xl opacity-20">🖼️</span>
           </div>
         )}
 
-        {/* Article Content */}
-        <article
-          className="prose prose-lg dark:prose-invert max-w-none 
-          prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
-          prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed
-          prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-          prose-strong:text-gray-900 dark:prose-strong:text-white
-          prose-li:text-gray-600 dark:prose-li:text-gray-300"
-        >
-          {/* If we had HTML content, we'd use dangerouslySetInnerHTML here. 
-              Since the type definition has `content: string | null`, and it might be markdown or HTML.
-              Assuming it's HTML for now or plain text. If markdown, we'd need a parser.
-              Let's assume it's HTML from a WYSIWYG editor for simplicity or raw string. 
-              If raw string, we might just display it. 
-              But usually `content` implies the body. 
-          */}
-          {post.content ? (
-            <div dangerouslySetInnerHTML={{ __html: post.content || "" }} />
-          ) : (
-            <p className="text-center italic text-gray-500">
-              No content available for this post.
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 relative">
+          {/* Table of Contents - Sidebar */}
+          {hasToc && (
+            <aside className="lg:col-span-3 order-1 lg:order-2">
+              <TableOfContents headings={toc} />
+            </aside>
           )}
-        </article>
+
+          {/* Article Content */}
+          <article
+            className={`
+              prose prose-lg dark:prose-invert max-w-none order-2 lg:order-1 
+              ${hasToc ? "lg:col-span-9" : "lg:col-span-8 lg:col-start-3"}
+              
+              /* Layout & Spacing */
+              scroll-mt-20
+
+              /* --- TYPOGRAPHY SYSTEM --- */
+              
+              /* Headings */
+              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
+              [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:mt-12 [&_h2]:mb-6 [&_h2]:leading-snug
+              [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mt-10 [&_h3]:mb-4 [&_h3]:leading-snug
+              [&_h4]:text-lg md:[&_h4]:text-xl  [&_h4]:font-semibold [&_h4]:mt-8  [&_h4]:mb-3
+              
+              /* Paragraphs - The 'Medium' Look */
+              [&_p]:text-base md:[&_p]:text-[18px] 
+              [&_p]:leading-[1.75rem] md:[&_p]:leading-[2.25rem] 
+              [&_p]:font-normal             
+              [&_p]:text-gray-700 dark:[&_p]:text-gray-300
+              [&_p]:mb-8
+              
+              /* Links */
+              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+              
+              /* Strong/Bold */
+              prose-strong:font-bold prose-strong:text-gray-900 dark:prose-strong:text-white
+              
+              /* Lists */
+              [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-8 [&_ul]:text-gray-700 dark:[&_ul]:text-gray-300
+              [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-8 [&_ol]:text-gray-700 dark:[&_ol]:text-gray-300
+              [&_li]:pl-2 [&_li]:mb-2 [&_li]:leading-relaxed md:[&_li]:text-[18px]
+              
+              /* Blockquotes */
+              [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 
+              [&_blockquote]:pl-6 [&_blockquote]:py-1 [&_blockquote]:my-10
+              [&_blockquote]:italic [&_blockquote]:text-xl [&_blockquote]:font-serif
+              [&_blockquote]:text-gray-600 dark:[&_blockquote]:text-gray-400
+              [&_blockquote]:bg-gray-50 dark:[&_blockquote]:bg-transparent
+              
+              /* Code Blocks */
+              [&_pre]:bg-gray-900 [&_pre]:text-gray-100 [&_pre]:p-6 [&_pre]:rounded-2xl 
+              [&_pre]:overflow-x-auto [&_pre]:my-10 [&_pre]:text-sm [&_pre]:shadow-lg
+              [&_pre]:relative /* Ensure copy button positioning */
+              [&_code]:font-mono
+              
+              /* Inline Code (not inside pre) */
+               [&_:not(pre)>code]:bg-gray-100 dark:[&_:not(pre)>code]:bg-gray-800 
+               [&_:not(pre)>code]:text-pink-600 dark:[&_:not(pre)>code]:text-pink-400 
+               [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 
+               [&_:not(pre)>code]:rounded-md [&_:not(pre)>code]:text-sm [&_:not(pre)>code]:font-medium
+               
+              /* Images */
+              [&_img]:rounded-xl [&_img]:w-full [&_img]:h-auto [&_img]:my-10 [&_img]:shadow-md
+            `}
+          >
+            {content ? (
+              <ArticleContent content={content} />
+            ) : (
+              <p className="text-center italic text-gray-500">
+                No content available for this post.
+              </p>
+            )}
+          </article>
+        </div>
 
         {/* Author Section */}
         {post.author && (
