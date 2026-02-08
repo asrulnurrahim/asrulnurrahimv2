@@ -20,14 +20,24 @@ async function checkProfileSchema() {
 
   if (error) {
     console.error("Error fetching profiles:", error);
-    return;
-  }
-
-  if (data && data.length > 0) {
+  } else if (data && data.length > 0) {
     console.log("Profile keys:", Object.keys(data[0]));
   } else {
     console.log("No profiles found to inspect.");
   }
 }
 
-checkProfileSchema();
+async function checkPostsSchema() {
+  const { data, error } = await supabase.from("posts").select("*").limit(1);
+
+  if (error) {
+    console.error("Error fetching posts:", error);
+  } else if (data && data.length > 0) {
+    console.log("Posts keys:", Object.keys(data[0]));
+  } else {
+    console.log("No posts found to inspect.");
+  }
+}
+
+// checkProfileSchema();
+checkPostsSchema();

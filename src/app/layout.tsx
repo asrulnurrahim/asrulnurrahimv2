@@ -16,9 +16,58 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ),
-  title: "Asrul Nur Rahim - Front-End Engineer",
+  title: {
+    default: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
+    template: "%s | Asrul Nur Rahim",
+  },
   description:
-    "Personal website of Asrul Nur Rahim, a Front-End Engineer and UI Architect.",
+    "Personal website of Asrul Nur Rahim. Specializing in pixel-perfect UI, performance optimization, and scalable front-end architecture.",
+  keywords: [
+    "Front-End Engineer",
+    "UI Architect",
+    "React Developer",
+    "Next.js Expert",
+    "TypeScript",
+    "Tailwind CSS",
+  ],
+  authors: [{ name: "Asrul Nur Rahim", url: "https://asrulnurrahim.com" }],
+  creator: "Asrul Nur Rahim",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
+    description:
+      "Crafting high-performance web experiences with precision and passion.",
+    siteName: "Asrul Nur Rahim",
+    images: [
+      {
+        url: "/asrul.jpg", // Ensure this image exists, or update
+        width: 1200,
+        height: 630,
+        alt: "Asrul Nur Rahim",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
+    description:
+      "Crafting high-performance web experiences with precision and passion.",
+    images: ["/asrul.jpg"],
+    creator: "@asrulnurrahim", // Update with actual handle if strictly known, otherwise generic
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },

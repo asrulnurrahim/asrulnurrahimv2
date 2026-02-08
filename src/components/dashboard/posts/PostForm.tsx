@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, ArrowLeft } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Image as ImageIcon, X } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Post, Category } from "@/lib/types";
 import EditorClient from "./EditorClient";
+import { uploadImage } from "@/lib/supabase/upload-image";
 
 interface PostFormProps {
   post?: Post;
@@ -16,7 +17,7 @@ interface PostFormProps {
 export function PostForm({ post, isEditing = false }: PostFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = React.useMemo(() => createClient(), []);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -27,7 +28,10 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
     status: post?.status || "draft",
     seo_title: post?.seo_title || "",
     seo_description: post?.seo_description || "",
+    thumbnail: post?.thumbnail || "",
   });
+
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -66,6 +70,27 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId],
     );
+  };
+
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    setUploadingThumbnail(true);
+    try {
+      const file = e.target.files[0];
+      const url = await uploadImage(file, "images", supabase);
+      setFormData((prev) => ({ ...prev, thumbnail: url }));
+    } catch (error: any) {
+      alert("Error uploading thumbnail: " + error.message);
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
+  const removeThumbnail = () => {
+    setFormData((prev) => ({ ...prev, thumbnail: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -194,6 +219,55 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                 className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 placeholder="Enter post title"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Thumbnail
+              </label>
+              <div className="space-y-4">
+                {formData.thumbnail ? (
+                  <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 group">
+                    <img
+                      src={formData.thumbnail}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={removeThumbnail}
+                        className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-8 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50">
+                    {uploadingThumbnail ? (
+                      <Loader2 className="w-10 h-10 animate-spin mb-2" />
+                    ) : (
+                      <ImageIcon className="w-10 h-10 mb-2" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {uploadingThumbnail
+                        ? "Uploading..."
+                        : "Click to upload thumbnail"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      disabled={uploadingThumbnail}
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-slate-500">
+                  Recommended size: 1200x630px (16:9 aspect ratio)
+                </p>
+              </div>
             </div>
 
             <div>

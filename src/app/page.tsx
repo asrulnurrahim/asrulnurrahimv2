@@ -35,11 +35,23 @@ export default async function Home() {
     "@type": "WebSite",
     name: "Asrul Nur Rahim",
     url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog?search={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
     author: {
       "@type": "Person",
       name: "Asrul Nur Rahim",
       jobTitle: "Front-End Engineer",
       url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      sameAs: [
+        "https://github.com/asrulnurrahim",
+        "https://linkedin.com/in/asrulnurrahim",
+      ],
     },
   };
 

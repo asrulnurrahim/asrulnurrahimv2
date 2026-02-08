@@ -9,9 +9,6 @@ import {
   Globe,
   ChevronRight,
 } from "lucide-react";
-import Image from "next/image";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
   title: "About Me - Front-End Developer & UI Specialist",
@@ -24,6 +21,9 @@ export const metadata: Metadata = {
       "Building clean, precise, and visually consistent web interfaces with a focus on performance and SEO.",
     type: "profile",
     images: ["/images/og-about.jpg"], // Update with actual OG image if available
+  },
+  alternates: {
+    canonical: "/about",
   },
 };
 
@@ -163,10 +163,10 @@ export default function AboutPage() {
       <section className="py-20 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">
-            Let's Build Something Amazing
+            Let&apos;s Build Something Amazing
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            I'm always open to discussing new projects, creative ideas, or
+            I&apos;m always open to discussing new projects, creative ideas, or
             opportunities to be part of your visions.
           </p>
           <a

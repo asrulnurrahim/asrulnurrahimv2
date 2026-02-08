@@ -40,16 +40,21 @@ export async function BlogSection() {
               key={post.id}
               className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow"
             >
-              {/* Image / Cover Placeholder */}
-              <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                {/* 
-                    TODO: Replace with actual image rendering when image URLs are available.
-                 */}
-                <div className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-700 group-hover:scale-105 transition-transform duration-500">
-                  <span className="text-6xl opacity-20">✍️</span>
-                </div>
+              {/* Image Container */}
+              <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-slate-800">
+                {post.thumbnail ? (
+                  <img
+                    src={post.thumbnail}
+                    alt={post.title}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-slate-700 text-gray-300 dark:text-gray-600">
+                    <span className="text-4xl opacity-50">🖼️</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-
               {/* Content */}
               <div className="flex flex-1 flex-col p-6">
                 {/* Meta: Category & Date */}

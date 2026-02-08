@@ -46,7 +46,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       publishedTime: post.published_at || undefined,
       authors: [post.author?.full_name || "Asrul Nurrahim"],
-      // images: [post.cover_image], // If we had a cover image field
+      images: [
+        {
+          url: post.thumbnail || "/images/og-default.jpg",
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.seo_title || post.title,
+      description: post.seo_description || post.excerpt || "",
+      images: [post.thumbnail || "/images/og-default.jpg"],
     },
   };
 }
@@ -75,11 +91,29 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.excerpt,
     datePublished: post.published_at,
     dateModified: post.updated_at || post.published_at,
+    image: post.thumbnail
+      ? [post.thumbnail]
+      : [
+          `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/images/og-default.jpg`,
+        ],
     author: {
       "@type": "Person",
       name: post.author?.full_name || "Asrul Nur Rahim",
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/about`,
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Asrul Nur Rahim",
+      logo: {
+        "@type": "ImageObject",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/favicon-96x96.png`,
+      },
     },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+    },
   };
 
   return (
@@ -156,10 +190,20 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </header>
 
-        {/* Featured Image Placeholder */}
-        <div className="aspect-video w-full bg-gray-200 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 flex items-center justify-center relative shadow-sm">
-          <span className="text-6xl opacity-20">🖼️</span>
-        </div>
+        {/* Featured Image */}
+        {post.thumbnail ? (
+          <div className="aspect-video w-full bg-gray-100 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 relative shadow-sm">
+            <img
+              src={post.thumbnail}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="aspect-video w-full bg-gray-200 dark:bg-slate-900 rounded-2xl overflow-hidden mb-12 flex items-center justify-center relative shadow-sm">
+            <span className="text-6xl opacity-20">🖼️</span>
+          </div>
+        )}
 
         {/* Article Content */}
         <article

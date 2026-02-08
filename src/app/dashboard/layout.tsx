@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 
 export const metadata: Metadata = {
-  title: "Dashboard - Able Pro",
+  title: "Dashboard - Asrul Nur Rahim",
   description: "Admin Dashboard",
 };
 

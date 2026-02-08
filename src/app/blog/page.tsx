@@ -25,6 +25,12 @@ export async function generateMetadata({
     alternates: {
       canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
     },
+    openGraph: {
+      title: "Blog | Asrul Nur Rahim",
+      description: "Insights, tutorials, and thoughts on software engineering.",
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
+      type: "website",
+    },
   };
 }
 
@@ -43,8 +49,30 @@ export default async function BlogPage({
     getRecentPosts(5),
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Asrul Nur Rahim Blog",
+    description: "Insights, tutorials, and thoughts on software engineering.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
+    author: {
+      "@type": "Person",
+      name: "Asrul Nur Rahim",
+    },
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      datePublished: post.published_at,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-30 pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -70,10 +98,17 @@ export default async function BlogPage({
                   className="w-full md:w-1/3 min-w-[280px] md:max-w-[320px] relative group"
                 >
                   <div className="aspect-video md:h-full w-full bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-                    {/* Placeholder for Image */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-300 dark:text-gray-600 group-hover:scale-105 transition-transform duration-500">
-                      <span className="text-5xl opacity-40">🖼️</span>
-                    </div>
+                    {post.thumbnail ? (
+                      <img
+                        src={post.thumbnail}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-300 dark:text-gray-600 group-hover:scale-105 transition-transform duration-500">
+                        <span className="text-5xl opacity-40">🖼️</span>
+                      </div>
+                    )}
                   </div>
                 </Link>
 

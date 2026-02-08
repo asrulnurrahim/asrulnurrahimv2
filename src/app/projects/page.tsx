@@ -12,14 +12,37 @@ export const metadata: Metadata = {
     description:
       "Showcase of my recent projects, applications, and experiments.",
     url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
+    type: "website",
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
   },
 };
 
 export default async function ProjectsPage() {
   const projects = await getProjects();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Projects | Asrul Nur Rahim",
+    description:
+      "Showcase of my recent projects, applications, and experiments.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
+    hasPart: projects.map((project) => ({
+      "@type": "CreativeWork",
+      name: project.title,
+      description: project.summary,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects/${project.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-30 pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">

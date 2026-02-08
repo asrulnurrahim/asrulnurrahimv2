@@ -11,6 +11,8 @@ interface RichTextEditorProps {
 }
 
 import { useTheme } from "next-themes";
+import { uploadImage } from "@/lib/supabase/upload-image";
+import { createClient } from "@/lib/supabase/client";
 
 export default function RichTextEditor({
   value,
@@ -23,6 +25,7 @@ export default function RichTextEditor({
 
   // Determine if dark mode is active
   const isDark = resolvedTheme === "dark";
+  const supabase = React.useMemo(() => createClient(), []);
 
   return (
     <Editor
@@ -72,6 +75,26 @@ export default function RichTextEditor({
         promotion: false, // Hide the "Upgrade" promotion button
         quickbars_selection_toolbar:
           "bold italic | quicklink h2 h3 blockquote quickimage quicktable",
+
+        // Image upload handler
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        images_upload_handler: (blobInfo: any, _progress: any) => {
+          return new Promise((resolve, reject) => {
+            const blob = blobInfo.blob();
+            const file = new File([blob], blobInfo.filename(), {
+              type: blob.type,
+            });
+
+            uploadImage(file, "images", supabase)
+              .then((url) => {
+                resolve(url);
+              })
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .catch((error: any) => {
+                reject(error.message);
+              });
+          });
+        },
       }}
     />
   );

@@ -41,6 +41,7 @@ export interface Post {
   slug: string;
   excerpt: string | null;
   content: string | null;
+  thumbnail: string | null;
   status: "draft" | "published";
   seo_title: string | null;
   seo_description: string | null;
