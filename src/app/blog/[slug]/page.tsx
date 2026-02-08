@@ -7,6 +7,7 @@ import {
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getCategoryColor } from "@/utils/colors";
 import {
   Calendar,
   User,
@@ -188,16 +189,19 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="flex items-center justify-center gap-4 mb-6 text-sm text-gray-500 dark:text-gray-400">
             {post.categories && post.categories.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center">
-                {post.categories.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/blog?category=${cat.slug}`}
-                    className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
-                  >
-                    <Tag className="w-3 h-3 mr-1.5" />
-                    {cat.name}
-                  </Link>
-                ))}
+                {post.categories.map((cat: any) => {
+                  const color = getCategoryColor(cat.slug);
+                  return (
+                    <Link
+                      key={cat.id}
+                      href={`/blog?category=${cat.slug}`}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold leading-none uppercase tracking-wider ${color.bg} ${color.text} ${color.darkBg} ${color.darkText} hover:opacity-80 transition-opacity`}
+                    >
+                      <Tag className="w-3 h-3 mr-1.5" />
+                      {cat.name}
+                    </Link>
+                  );
+                })}
               </div>
             )}
 
