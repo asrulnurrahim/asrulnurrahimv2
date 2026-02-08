@@ -1,5 +1,6 @@
 import { getPosts, getCategories, getRecentPosts } from "@/services/db";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import SearchInput from "./components/SearchInput";
 
@@ -140,9 +141,16 @@ export default async function BlogPage({
                         },
                       )}
                     </div>
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+                      <Eye className="w-3.5 h-3.5 mr-1" />
+                      {(post.views || 0).toLocaleString()}
+                    </div>
                   </div>
 
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  <h2
+                    className="text-xl md:text-2xl font-bold text-[#32424a] dark:text-white mb-3 hover:text-[#1e282d] dark:hover:text-blue-400 transition-colors line-clamp-2"
+                    title={post.title}
+                  >
                     <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                   </h2>
 
@@ -185,7 +193,7 @@ export default async function BlogPage({
                     href={`/blog/${post.slug}`}
                     className="group"
                   >
-                    <h4 className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                    <h4 className="text-[#32424a] dark:text-gray-300 font-medium group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                       {post.title}
                     </h4>
                     <span className="text-xs text-gray-400 mt-1 block">

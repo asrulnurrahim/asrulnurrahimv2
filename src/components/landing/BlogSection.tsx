@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getPosts } from "@/services/db";
-import { Calendar, ArrowRight } from "lucide-react";
+import { Calendar, ArrowRight, Eye } from "lucide-react";
 
 export async function BlogSection() {
   const posts = await getPosts();
@@ -64,14 +64,23 @@ export async function BlogSection() {
                       {post.category.name}
                     </span>
                   )}
-                  <div className="flex items-center text-gray-500 dark:text-gray-400">
-                    <Calendar className="mr-1.5 h-3.5 w-3.5" />
-                    {formatDate(post.published_at)}
+                  <div className="flex items-center text-gray-500 dark:text-gray-400 gap-4">
+                    <span className="flex items-center">
+                      <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                      {formatDate(post.published_at)}
+                    </span>
+                    <span className="flex items-center">
+                      <Eye className="mr-1.5 h-3.5 w-3.5" />
+                      {(post.views || 0).toLocaleString()}
+                    </span>
                   </div>
                 </div>
 
                 {/* Title */}
-                <h3 className="mb-3 text-xl font-bold leading-tight text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h3
+                  className="mb-3 text-xl font-bold leading-tight text-[#32424a] dark:text-white group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                  title={post.title}
+                >
                   <Link
                     href={`/blog/${post.slug}`}
                     className="focus:outline-none"
@@ -87,7 +96,7 @@ export async function BlogSection() {
                 </p>
 
                 {/* Read More Link */}
-                <div className="mt-auto flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                <div className="mt-auto flex items-center text-sm font-semibold text-[#32424a] dark:text-blue-400 group-hover:text-[#1e282d] dark:group-hover:text-blue-300 group-hover:translate-x-1 transition-all">
                   Read Article
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </div>

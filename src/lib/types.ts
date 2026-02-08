@@ -39,6 +39,7 @@ export interface Post {
   id: string;
   title: string;
   slug: string;
+  views: number;
   excerpt: string | null;
   content: string | null;
   thumbnail: string | null;

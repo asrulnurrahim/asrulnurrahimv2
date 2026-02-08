@@ -13,6 +13,7 @@ import {
   Twitter,
   Instagram,
 } from "lucide-react";
+import ViewCounter from "@/components/blog/ViewCounter";
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -172,10 +173,18 @@ export default async function BlogPostPage({ params }: Props) {
                 ))}
               </div>
             )}
+            {/* import ViewCounter from &quot;@/components/blog/ViewCounter&quot;; // ...
+            existing imports // ... inside BlogPostPage component */}
             <span className="flex items-center">
               <Calendar className="w-4 h-4 mr-1.5" />
               {formattedDate}
             </span>
+            <span className="mx-2 text-gray-300 dark:text-gray-600">•</span>
+            <ViewCounter
+              slug={post.slug}
+              initialViews={post.views || 0}
+              trackView={true}
+            />
           </div>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">

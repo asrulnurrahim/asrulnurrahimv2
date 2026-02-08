@@ -72,6 +72,9 @@
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
 
+    --title-link: #32424a;
+    --title-link-hover: #1e282d;
+
     --border: #e2e8f0;
     --input: #e2e8f0;
     --ring: #4586ff;
@@ -107,6 +110,9 @@
     --destructive: #7f1d1d;
     --destructive-foreground: #f8fafc;
 
+    --title-link: #f8fafc;
+    --title-link-hover: #cbd5e1;
+
     --border: #1e293b;
     --input: #1e293b;
     --ring: #cbd5e1;
@@ -137,15 +143,21 @@
 
   a {
     color: var(--primary);
-  }
-
-  a {
-    color: var(--primary);
     transition: color 0.2s ease;
   }
 
   a:hover {
     color: var(--primary-hover);
+  }
+
+  h2,
+  h3 {
+    a {
+      color: var(--title-link);
+    }
+    a:hover {
+      color: var(--title-link-hover);
+    }
   }
 
   .shadow-subtle {

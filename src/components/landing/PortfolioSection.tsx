@@ -60,7 +60,10 @@ export async function PortfolioSection() {
                 </div>
 
                 {/* Title */}
-                <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h3
+                  className="mb-2 text-xl font-bold text-[#32424a] dark:text-white group-hover:text-[#1e282d] dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                  title={portfolio.title}
+                >
                   <Link
                     href={`/portfolio/${portfolio.slug}`}
                     className="focus:outline-none"
@@ -76,7 +79,7 @@ export async function PortfolioSection() {
                 </p>
 
                 {/* Footer / Link */}
-                <div className="mt-auto flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                <div className="mt-auto flex items-center text-sm font-semibold text-[#32424a] dark:text-blue-400 group-hover:text-[#1e282d] dark:group-hover:text-blue-300">
                   View Case Study
                   <ArrowUpRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </div>

@@ -66,7 +66,7 @@ export default async function ProjectsPage() {
                 </div>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-xl font-bold text-[#32424a] dark:text-white mb-2 group-hover:text-[#1e282d] transition-colors">
                   {project.title}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
