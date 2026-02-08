@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import ClientLayout from "@/components/layout/ClientLayout";
-import { ThemeProvider } from "@/components/theme-provider";
+import ClientLayout from "@/components/shell/ClientLayout";
+import { ThemeProvider } from "@/app/providers/theme-provider";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
@@ -13,6 +13,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
   title: "Asrul Nur Rahim - Front-End Engineer",
   description:
     "Personal website of Asrul Nur Rahim, a Front-End Engineer and UI Architect.",

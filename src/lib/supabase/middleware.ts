@@ -29,11 +29,17 @@ export async function updateSession(request: NextRequest) {
   // - no Supabase calls
   // - no cookie mutation
   // - no infinite compiling on 404 / error routes
-  if (!isProtectedRoute(path)) {
+  // 1. Early exit for all non-protected routes AND not /login
+  // This guarantees:
+  // - no Supabase calls (save for login/protected)
+  // - no cookie mutation
+  // - no infinite compiling on 404 / error routes
+  const isLoginPage = path === "/login";
+  if (!isProtectedRoute(path) && !isLoginPage) {
     return NextResponse.next({ request });
   }
 
-  // 2. Prepare response only for protected routes
+  // 2. Prepare response only for protected routes or /login
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -67,7 +73,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 4. Access control
-  if (!user) {
+  if (isLoginPage && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  if (isProtectedRoute(path) && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

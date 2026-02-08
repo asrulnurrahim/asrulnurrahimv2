@@ -4,20 +4,20 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, ExternalLink } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { UserMenu } from "@/components/layout/UserMenu";
+import { UserMenu } from "@/components/shell/UserMenu";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
+  const navLinks: { href: string; label: string; external?: boolean }[] = [
     { href: "/about", label: "About" },
-    { href: "#", label: "Projects" },
+    { href: "/projects", label: "Projects" },
     { href: "/blog", label: "Blogs" },
-    {
-      href: "https://phoenixcoded.gitbook.io/able-pro",
-      label: "Contact",
-      external: true,
-    },
+    // {
+    //   href: "#",
+    //   label: "Contact",
+    //   external: true,
+    // },
   ];
 
   return (

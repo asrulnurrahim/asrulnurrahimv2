@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/app/providers/theme-provider";
 import { motion } from "framer-motion";
 
 export function ThemeToggle() {

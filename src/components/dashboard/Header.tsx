@@ -38,7 +38,7 @@ export function Header({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login"); // Redirect to login after sign out
+    router.push("/"); // Redirect to login after sign out
     router.refresh(); // Refresh to clear any cache
   };
 

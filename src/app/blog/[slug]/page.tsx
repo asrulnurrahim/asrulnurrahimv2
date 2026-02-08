@@ -68,8 +68,26 @@ export default async function BlogPostPage({ params }: Props) {
       })
     : "Unpublished";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.published_at,
+    dateModified: post.updated_at || post.published_at,
+    author: {
+      "@type": "Person",
+      name: post.author?.full_name || "Asrul Nur Rahim",
+    },
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-30 pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">

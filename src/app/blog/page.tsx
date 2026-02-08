@@ -3,7 +3,30 @@ import Link from "next/link";
 
 import SearchInput from "./components/SearchInput";
 
+import { Metadata } from "next";
+
 export const revalidate = 60; // Revalidate every minute
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const isFiltered = !!params.category || !!params.search;
+
+  return {
+    title: "Blog | Asrul Nur Rahim",
+    description: "Insights, tutorials, and thoughts on software engineering.",
+    robots: {
+      index: !isFiltered,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
+    },
+  };
+}
 
 export default async function BlogPage({
   searchParams,

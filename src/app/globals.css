@@ -26,6 +26,13 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
 
+  --theme-bodybg: #f8f9fa;
+  --theme-cardbg: #fff;
+  --theme-border: #e7eaee;
+  --themedark-bodybg: #131920;
+  --themedark-cardbg: #1b232d;
+  --themedark-border: #303f50;
+
   /* Typography Settings */
   --color-text-default: #202124;
   --font-family-text: var(--font-jakarta), sans-serif;
@@ -191,4 +198,3 @@
 .tox-promotion {
   display: none !important;
 }
-

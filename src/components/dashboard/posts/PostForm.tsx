@@ -2,24 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Post, Category } from "@/lib/types";
-
-// Dynamic import with SSR disabled to prevent hydration mismatch
-const RichTextEditor = dynamic(
-  () => import("@/components/dashboard/posts/RichTextEditor"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[500px] w-full bg-slate-50 dark:bg-slate-800 rounded-lg animate-pulse flex items-center justify-center text-slate-400">
-        Loading editor...
-      </div>
-    ),
-  },
-);
+import EditorClient from "./EditorClient";
 
 interface PostFormProps {
   post?: Post;
@@ -214,7 +201,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                 Content
               </label>
               <div className="min-h-[400px]">
-                <RichTextEditor
+                <EditorClient
                   apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                   value={formData.content}
                   onChange={(content) =>
