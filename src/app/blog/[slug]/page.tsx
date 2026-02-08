@@ -1,4 +1,9 @@
-import { getPostBySlug, getPosts } from "@/services/db";
+import {
+  getPostBySlug,
+  getPosts,
+  getRelatedPosts,
+  getRecentPosts,
+} from "@/services/db";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,11 +17,15 @@ import {
   Linkedin,
   Twitter,
   Instagram,
+  Clock,
 } from "lucide-react";
 import ViewCounter from "@/components/blog/ViewCounter";
 import { processContent } from "@/lib/toc";
+import { calculateReadingTime } from "@/lib/utils";
 import TableOfContents from "@/components/blog/TableOfContents";
 import ArticleContent from "@/components/blog/ArticleContent";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -77,6 +86,18 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) {
     notFound();
+  }
+
+  // Fetch Related Posts
+  const categoryIds = post.categories?.map((c) => c.id) || [];
+  let relatedPosts = await getRelatedPosts(post.id, categoryIds);
+  let isRelated = true;
+
+  // Fallback to recent posts if no related posts found
+  if (relatedPosts.length === 0) {
+    const recent = await getRecentPosts(4); // Fetch 4 to be safe
+    relatedPosts = recent.filter((p) => p.id !== post.id).slice(0, 3);
+    isRelated = false;
   }
 
   // Format date
@@ -185,6 +206,25 @@ export default async function BlogPostPage({ params }: Props) {
               {formattedDate}
             </span>
             <span className="mx-2 text-gray-300 dark:text-gray-600">•</span>
+            {(() => {
+              const { readingTime, wordCount } = calculateReadingTime(
+                post.content || "",
+              );
+              return (
+                <>
+                  <span
+                    className="flex items-center"
+                    title={`${wordCount.toLocaleString("id-ID")} kata`}
+                  >
+                    <Clock className="w-4 h-4 mr-1.5" />
+                    {readingTime} menit baca
+                  </span>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">
+                    •
+                  </span>
+                </>
+              );
+            })()}
             <ViewCounter
               slug={post.slug}
               initialViews={post.views || 0}
@@ -227,11 +267,15 @@ export default async function BlogPostPage({ params }: Props) {
             </aside>
           )}
 
-          {/* Article Content */}
-          <article
-            className={`
-              prose prose-lg dark:prose-invert max-w-none order-2 lg:order-1 
-              ${hasToc ? "lg:col-span-9" : "lg:col-span-8 lg:col-start-3"}
+          {/* Main Content Column */}
+          <div
+            className={`order-2 lg:order-1 ${
+              hasToc ? "lg:col-span-9" : "lg:col-span-8 lg:col-start-3"
+            }`}
+          >
+            <article
+              className={`
+              prose prose-lg dark:prose-invert max-w-none 
               
               /* Layout & Spacing */
               scroll-mt-20
@@ -284,87 +328,138 @@ export default async function BlogPostPage({ params }: Props) {
               /* Images */
               [&_img]:rounded-xl [&_img]:w-full [&_img]:h-auto [&_img]:my-10 [&_img]:shadow-md
             `}
-          >
-            {content ? (
-              <ArticleContent content={content} />
-            ) : (
-              <p className="text-center italic text-gray-500">
-                No content available for this post.
-              </p>
-            )}
-          </article>
-        </div>
-
-        {/* Author Section */}
-        {post.author && (
-          <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
-              <div className="shrink-0">
-                {post.author.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={post.author.avatar_url}
-                    alt={post.author.full_name || "Author"}
-                    className="w-20 h-20 rounded-full object-cover border-4 border-gray-50 dark:border-gray-800"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center border-4 border-gray-50 dark:border-gray-800">
-                    <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                  </div>
-                )}
-              </div>
-              <div className="text-center sm:text-left flex-1">
-                <div className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">
-                  About the Author
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {post.author.full_name || "Admin"}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                  {post.author.bio ||
-                    post.author.headline ||
-                    "Passionate writer and developer sharing knowledge about technology and coding."}
+            >
+              {content ? (
+                <ArticleContent content={content} />
+              ) : (
+                <p className="text-center italic text-gray-500">
+                  No content available for this post.
                 </p>
+              )}
+            </article>
 
-                {/* Social Links */}
-                <div className="flex items-center gap-4">
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    <Github className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors"
-                  >
-                    <Twitter className="w-5 h-5" />
-                  </a>
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
-                  >
-                    <Instagram className="w-5 h-5" />
-                  </a>
+            {/* Author Section */}
+            {post.author && (
+              <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                  <div className="shrink-0">
+                    {post.author.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.author.avatar_url}
+                        alt={post.author.full_name || "Author"}
+                        className="w-20 h-20 rounded-full object-cover border-4 border-gray-50 dark:border-gray-800"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center border-4 border-gray-50 dark:border-gray-800">
+                        <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center sm:text-left flex-1">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">
+                      About the Author
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {post.author.full_name || "Admin"}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                      {post.author.bio ||
+                        post.author.headline ||
+                        "Passionate writer and developer sharing knowledge about technology and coding."}
+                    </p>
+
+                    {/* Social Links */}
+                    <div className="flex items-center gap-4">
+                      <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      >
+                        <Github className="w-5 h-5" />
+                      </a>
+                      <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      >
+                        <Linkedin className="w-5 h-5" />
+                      </a>
+                      <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors"
+                      >
+                        <Twitter className="w-5 h-5" />
+                      </a>
+                      <a
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+                      >
+                        <Instagram className="w-5 h-5" />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Related Posts Section */}
+            {relatedPosts.length > 0 && (
+              <div className="mt-16 border-t border-gray-200 dark:border-gray-800 pt-10">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                  {isRelated ? "Artikel Terkait" : "Artikel Terbaru"}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  {relatedPosts.map((relatedPost) => (
+                    <Link
+                      key={relatedPost.id}
+                      href={`/blog/${relatedPost.slug}`}
+                      className="group block"
+                    >
+                      <div className="relative aspect-video mb-3 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                        {relatedPost.thumbnail ? (
+                          <img
+                            src={relatedPost.thumbnail}
+                            alt={relatedPost.title}
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center w-full h-full text-gray-400">
+                            <Tag className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold">
+                          {relatedPost.categories?.[0]?.name || "Blog"}
+                        </div>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-tight">
+                          {relatedPost.title}
+                        </h4>
+                        <time className="text-xs text-gray-500 dark:text-gray-400 block">
+                          {format(
+                            new Date(
+                              relatedPost.published_at ||
+                                relatedPost.created_at,
+                            ),
+                            "d MMMM yyyy",
+                            { locale: id },
+                          )}
+                        </time>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -153,7 +153,7 @@ export const getRecentPosts = async (limit = 5) => {
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "title, slug, published_at, post_cats:post_categories(category:categories(id, name, slug))",
+      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug))",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -383,4 +383,54 @@ export const deletePost = async (id: string) => {
   const supabase = await createClient();
   const { error } = await supabase.from("posts").delete().eq("id", id);
   if (error) throw error;
+};
+
+export const getRelatedPosts = async (
+  currentPostId: string,
+  categoryIds: string[],
+  limit = 3,
+) => {
+  const supabase = await createClient();
+
+  if (categoryIds.length === 0) return [];
+
+  // Get candidate post IDs
+  const { data: candidates, error: candidateError } = await supabase
+    .from("post_categories")
+    .select("post_id")
+    .in("category_id", categoryIds);
+
+  if (candidateError) throw new Error(candidateError.message);
+
+  const candidateIds = new Set(
+    candidates.map((c) => c.post_id).filter((id) => id !== currentPostId),
+  );
+
+  if (candidateIds.size === 0) return [];
+
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select(
+      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug))",
+    )
+    .in("id", Array.from(candidateIds))
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  // Transform
+  return (posts || []).map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = post as any;
+    return {
+      ...p,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      categories: p.post_cats
+        .map((c: any) => c.category)
+        .filter((c: any) => c !== null),
+    };
+  }) as Post[];
 };
