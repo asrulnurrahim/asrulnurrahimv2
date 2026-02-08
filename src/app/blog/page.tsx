@@ -219,16 +219,28 @@ export default async function BlogPage({
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Topics
               </h3>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Link
                   href="/blog"
-                  className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
+                  className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     !category
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                      : "hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-600 dark:text-gray-300"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                   }`}
                 >
-                  <span className="font-medium">All Topics</span>
+                  <span className="font-medium mr-1.5">All</span>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded-md ${
+                      !category
+                        ? "bg-gray-700 text-gray-200 dark:bg-gray-200 dark:text-gray-700"
+                        : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
+                    }`}
+                  >
+                    {categories.reduce(
+                      (acc, cat) => acc + (cat.posts?.[0]?.count || 0),
+                      0,
+                    )}
+                  </span>
                 </Link>
                 {categories.map((cat) => {
                   const isActive = category === cat.slug;
@@ -236,26 +248,18 @@ export default async function BlogPage({
                     <Link
                       key={cat.id}
                       href={`/blog?category=${cat.slug}`}
-                      className={`flex items-center justify-between p-2 rounded-lg transition-colors group ${
+                      className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors ${
                         isActive
-                          ? "bg-blue-50 dark:bg-blue-900/20"
-                          : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                       }`}
                     >
+                      <span className="font-medium mr-1.5">{cat.name}</span>
                       <span
-                        className={`font-medium transition-colors ${
+                        className={`text-xs px-1.5 py-0.5 rounded-md ${
                           isActive
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                        }`}
-                      >
-                        {cat.name}
-                      </span>
-                      <span
-                        className={`text-sm ${
-                          isActive
-                            ? "text-blue-400 dark:text-blue-300"
-                            : "text-gray-400"
+                            ? "bg-blue-500 text-blue-50"
+                            : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
                         }`}
                       >
                         {cat.posts?.[0]?.count || 0}
