@@ -270,14 +270,28 @@ export const getDashboardPosts = async () => {
   const supabase = await createClient();
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("*, author:profiles(*)")
+    .select(
+      "*, author:profiles(*), post_cats:post_categories(category:categories(id, name, slug))",
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching posts:", error);
     return [];
   }
-  return posts;
+
+  // Transform
+  return (posts || []).map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = post as any;
+    return {
+      ...p,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      categories: p.post_cats
+        .map((c: any) => c.category)
+        .filter((c: any) => c !== null),
+    };
+  }) as Post[];
 };
 
 export const getPost = async (id: string) => {

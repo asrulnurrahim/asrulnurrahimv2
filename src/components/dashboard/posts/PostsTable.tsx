@@ -69,6 +69,9 @@ export function PostsTable({ posts: initialPosts }: PostsTableProps) {
                   Title
                 </th>
                 <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -96,6 +99,24 @@ export function PostsTable({ posts: initialPosts }: PostsTableProps) {
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         /{post.slug}
                       </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      {post.categories && post.categories.length > 0 ? (
+                        <div className="flex items-center gap-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            {post.categories[0].name}
+                          </span>
+                          {post.categories.length > 1 && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              +{post.categories.length - 1}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">
+                          Uncategorized
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <span
@@ -150,7 +171,7 @@ export function PostsTable({ posts: initialPosts }: PostsTableProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center">
+                  <td colSpan={6} className="py-8 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                       <p className="text-sm">No posts found</p>
                       {searchTerm && (
