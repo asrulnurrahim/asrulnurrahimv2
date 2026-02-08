@@ -266,22 +266,68 @@ export const getOwnerProfile = async () => {
 };
 
 // Blog Posts
-export const getDashboardPosts = async () => {
+export interface DashboardPostsOptions {
+  page?: number;
+  limit?: number;
+  query?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+}
+
+export const getDashboardPosts = async (
+  options: DashboardPostsOptions = {},
+) => {
+  const {
+    page = 1,
+    limit = 10,
+    query = "",
+    sort = "created_at",
+    order = "desc",
+  } = options;
+  const offset = (page - 1) * limit;
+
   const supabase = await createClient();
-  const { data: posts, error } = await supabase
+
+  let dbQuery = supabase
     .from("posts")
     .select(
       "*, author:profiles(*), post_cats:post_categories(category:categories(id, name, slug))",
-    )
-    .order("created_at", { ascending: false });
+      { count: "exact" },
+    );
+
+  // Search
+  if (query) {
+    dbQuery = dbQuery.ilike("title", `%${query}%`);
+  }
+
+  // Sort
+  if (sort === "author") {
+    dbQuery = dbQuery.order("full_name", {
+      foreignTable: "profiles",
+      ascending: order === "asc",
+    });
+  } else if (sort === "category") {
+    // Sorting by M2M relation is complex, skip for now or default to created_at
+    dbQuery = dbQuery.order("created_at", { ascending: order === "asc" });
+  } else {
+    // Default column sort
+    dbQuery = dbQuery.order(sort, { ascending: order === "asc" });
+  }
+
+  // Pagination
+  const {
+    data: posts,
+    error,
+    count,
+  } = await dbQuery.range(offset, offset + limit - 1);
 
   if (error) {
     console.error("Error fetching posts:", error);
-    return [];
+    return { data: [], meta: { total: 0, page, last_page: 0 } };
   }
 
   // Transform
-  return (posts || []).map((post) => {
+  const transformedData = (posts || []).map((post) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const p = post as any;
     return {
@@ -292,6 +338,15 @@ export const getDashboardPosts = async () => {
         .filter((c: any) => c !== null),
     };
   }) as Post[];
+
+  return {
+    data: transformedData,
+    meta: {
+      total: count || 0,
+      page,
+      last_page: Math.ceil((count || 0) / limit),
+    },
+  };
 };
 
 export const getPost = async (id: string) => {

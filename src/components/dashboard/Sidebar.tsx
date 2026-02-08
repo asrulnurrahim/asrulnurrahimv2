@@ -142,10 +142,10 @@ export function Sidebar({
               isActive={pathname === "/dashboard/posts"}
             />
             <NavItem
-              href="/dashboard/posts/new"
+              href="/dashboard/posts/create"
               icon={<Plus className="w-4 h-4" />}
               label="New Post"
-              isActive={pathname === "/dashboard/posts/new"}
+              isActive={pathname === "/dashboard/posts/create"}
             />
             <NavItem
               href="/dashboard/categories"
