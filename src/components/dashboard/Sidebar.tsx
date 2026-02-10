@@ -15,6 +15,7 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  Tag,
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -132,7 +133,8 @@ export function Sidebar({
             icon={<FileText className="w-5 h-5" />}
             isActive={
               pathname.startsWith("/dashboard/posts") ||
-              pathname.startsWith("/dashboard/categories")
+              pathname.startsWith("/dashboard/categories") ||
+              pathname.startsWith("/dashboard/tags")
             }
           >
             <NavItem
@@ -152,6 +154,12 @@ export function Sidebar({
               icon={<Grid className="w-4 h-4" />}
               label="Categories"
               isActive={pathname === "/dashboard/categories"}
+            />
+            <NavItem
+              href="/dashboard/tags"
+              icon={<Tag className="w-4 h-4" />}
+              label="Tags"
+              isActive={pathname === "/dashboard/tags"}
             />
           </NavGroup>
 

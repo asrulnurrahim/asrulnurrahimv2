@@ -1,3 +1,10 @@
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -49,6 +56,7 @@ export interface Post {
   category_id?: string | null; // Deprecated
   category?: Category | null; // Deprecated
   categories?: Category[]; // Many-to-Many
+  tags?: Tag[]; // Many-to-Many
   author_id: string | null;
   author?: Profile | null; // Joined
   published_at: string | null;

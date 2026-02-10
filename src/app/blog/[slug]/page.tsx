@@ -338,6 +338,22 @@ export default async function BlogPostPage({ params }: Props) {
               )}
             </article>
 
+            {/* Tags Section */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag.id}
+                    href={`/blog/tag/${tag.slug}`}
+                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <span className="mr-1">#</span>
+                    {tag.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             {/* Author Section */}
             {post.author && (
               <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">

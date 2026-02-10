@@ -1,7 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { Portfolio, Post, Category } from "@/lib/types";
+import { Portfolio, Post, Category, Tag } from "@/lib/types";
 
 // Ensure we are using the private environment variables
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -148,6 +148,128 @@ export const getPosts = async (search?: string, categorySlug?: string) => {
   }) as Post[];
 };
 
+export const getPaginatedPosts = async (
+  page = 1,
+  limit = 10,
+  search?: string,
+  categorySlug?: string,
+  tagSlug?: string,
+) => {
+  const supabase = await createClient();
+  const offset = (page - 1) * limit;
+
+  let postIds: string[] | null = null;
+  let tagPostIds: string[] | null = null;
+
+  // Step 1: Filter by category if provided
+  if (categorySlug) {
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from("post_categories")
+      .select("post_id, category:categories!inner(slug)")
+      .eq("category.slug", categorySlug);
+
+    if (categoriesError)
+      throw new Error(`Supabase error: ${categoriesError.message}`);
+
+    postIds = categoriesData.map((item) => item.post_id);
+
+    if (postIds.length === 0) {
+      return {
+        data: [],
+        meta: { total: 0, page, limit, last_page: 0 },
+      };
+    }
+  }
+
+  // Step 2: Filter by tag if provided
+  if (tagSlug) {
+    const { data: tagsData, error: tagsError } = await supabase
+      .from("post_tags")
+      .select("post_id, tag:tags!inner(slug)")
+      .eq("tag.slug", tagSlug);
+
+    if (tagsError) throw new Error(`Supabase error: ${tagsError.message}`);
+
+    tagPostIds = tagsData.map((item) => item.post_id);
+
+    if (tagPostIds.length === 0) {
+      return {
+        data: [],
+        meta: { total: 0, page, limit, last_page: 0 },
+      };
+    }
+  }
+
+  // Step 3: Fetch posts
+  let query = supabase
+    .from("posts")
+    .select(
+      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
+      { count: "exact" },
+    )
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("published_at", { ascending: false });
+
+  if (search) {
+    query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
+  }
+
+  if (postIds !== null) {
+    query = query.in("id", postIds);
+  }
+
+  if (tagPostIds !== null) {
+    // If we have both category and tag filters, we need the intersection
+    if (postIds !== null) {
+      const intersection = postIds.filter((id) => tagPostIds!.includes(id));
+      if (intersection.length === 0) {
+        return {
+          data: [],
+          meta: { total: 0, page, limit, last_page: 0 },
+        };
+      }
+      query = query.in("id", intersection);
+    } else {
+      query = query.in("id", tagPostIds);
+    }
+  }
+
+  // Apply pagination
+  query = query.range(offset, offset + limit - 1);
+
+  const { data: posts, error, count } = await query;
+
+  if (error) throw new Error(`Supabase error: ${error.message}`);
+
+  // Transform
+  const transformedData = (posts || []).map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = post as any;
+    return {
+      ...p,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      categories: p.post_cats
+        .map((c: any) => c.category)
+        .filter((c: any) => c !== null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tags: p.post_tags?.map((t: any) => t.tag).filter((t: any) => t !== null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      category: p.post_cats[0]?.category || null, // Backward compatibility
+    };
+  }) as Post[];
+
+  return {
+    data: transformedData,
+    meta: {
+      total: count || 0,
+      page,
+      limit,
+      last_page: Math.ceil((count || 0) / limit),
+    },
+  };
+};
+
 export const getRecentPosts = async (limit = 5) => {
   const supabase = await createClient();
   const { data: posts, error } = await supabase
@@ -263,13 +385,38 @@ export const deleteCategory = async (id: string) => {
   if (error) throw error;
 };
 
+// Tags
+export const getTags = async () => {
+  const supabase = await createClient();
+  const { data: tags, error } = await supabase
+    .from("tags")
+    .select("*")
+    .order("name", { ascending: true })
+    .returns<Tag[]>();
+
+  if (error) throw new Error(`Supabase error: ${error.message}`);
+  return tags || [];
+};
+
+export const getTagBySlug = async (slug: string) => {
+  const supabase = await createClient();
+  const { data: tag, error } = await supabase
+    .from("tags")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) return null;
+  return tag as Tag;
+};
+
 export const getPostBySlug = async (slug: string) => {
   const supabase = await createClient();
   // Using lowercase 'categories' and 'profiles' to match strict schema relationship names
   const { data: post, error } = await supabase
     .from("posts")
     .select(
-      "*, post_cats:post_categories(category:categories(id, name, slug)), author:profiles(full_name, avatar_url)",
+      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -286,6 +433,8 @@ export const getPostBySlug = async (slug: string) => {
     categories: p.post_cats
       .map((c: any) => c.category)
       .filter((c: any) => c !== null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tags: p.post_tags?.map((t: any) => t.tag).filter((t: any) => t !== null),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     category: p.post_cats[0]?.category || null,
   } as Post;
@@ -377,6 +526,8 @@ export const getDashboardPosts = async (
       categories: p.post_cats
         .map((c: any) => c.category)
         .filter((c: any) => c !== null),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tags: p.post_tags?.map((t: any) => t.tag).filter((t: any) => t !== null),
     };
   }) as Post[];
 
@@ -394,7 +545,9 @@ export const getPost = async (id: string) => {
   const supabase = await createClient();
   const { data: post, error } = await supabase
     .from("posts")
-    .select("*, post_cats:post_categories(category:categories(id, name, slug))")
+    .select(
+      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug))",
+    )
     .eq("id", id)
     .single();
 
@@ -408,6 +561,8 @@ export const getPost = async (id: string) => {
     categories: p.post_cats
       .map((c: any) => c.category)
       .filter((c: any) => c !== null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tags: p.post_tags?.map((t: any) => t.tag).filter((t: any) => t !== null),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     category: p.post_cats[0]?.category || null,
   } as Post;

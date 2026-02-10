@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Save, ArrowLeft, Image as ImageIcon, X } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Post, Category } from "@/lib/types";
+import { Post, Category, Tag } from "@/lib/types";
 import EditorClient from "./EditorClient";
 import { uploadImage } from "@/lib/supabase/upload-image";
 
@@ -20,6 +20,8 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
   const supabase = React.useMemo(() => createClient(), []);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: post?.title || "",
     slug: post?.slug || "",
@@ -38,13 +40,24 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       const { data } = await supabase.from("categories").select("*");
       if (data) setCategories(data);
     };
+
+    const fetchTags = async () => {
+      const { data } = await supabase.from("tags").select("*");
+      if (data) setTags(data);
+    };
+
     fetchCategories();
+    fetchTags();
 
     if (post?.categories) {
       setSelectedCategories(post.categories.map((c) => c.id));
     } else if (post?.category) {
       // Backward compatibility
       setSelectedCategories([post.category.id]);
+    }
+
+    if (post?.tags) {
+      setSelectedTags(post.tags.map((t) => t.id));
     }
   }, [supabase, post]);
 
@@ -69,6 +82,14 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       prev.includes(categoryId)
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId],
+    );
+  };
+
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId],
     );
   };
 
@@ -136,25 +157,45 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       if (postId) {
         // Manage Categories
         if (isEditing) {
-          // Delete existing
-          const { error: deleteError } = await supabase
+          // Delete existing categories
+          const { error: deleteCatError } = await supabase
             .from("post_categories")
             .delete()
             .eq("post_id", postId);
-          if (deleteError) throw deleteError;
+          if (deleteCatError) throw deleteCatError;
+
+          // Delete existing tags
+          const { error: deleteTagError } = await supabase
+            .from("post_tags")
+            .delete()
+            .eq("post_id", postId);
+          if (deleteTagError) throw deleteTagError;
         }
 
-        // Insert new
+        // Insert new categories
         if (selectedCategories.length > 0) {
           const postCategories = selectedCategories.map((catId) => ({
             post_id: postId,
             category_id: catId,
           }));
 
-          const { error: insertError } = await supabase
+          const { error: insertCatError } = await supabase
             .from("post_categories")
             .insert(postCategories);
-          if (insertError) throw insertError;
+          if (insertCatError) throw insertCatError;
+        }
+
+        // Insert new tags
+        if (selectedTags.length > 0) {
+          const postTags = selectedTags.map((tagId) => ({
+            post_id: postId,
+            tag_id: tagId,
+          }));
+
+          const { error: insertTagError } = await supabase
+            .from("post_tags")
+            .insert(postTags);
+          if (insertTagError) throw insertTagError;
         }
       }
 
@@ -374,6 +415,34 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                 {categories.length === 0 && (
                   <p className="text-xs text-slate-500 italic">
                     No categories found. Create one in Categories page.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Tags
+              </label>
+              <div className="max-h-60 overflow-y-auto space-y-2 border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-800">
+                {tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={() => handleTagToggle(tag.id)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                      {tag.name}
+                    </span>
+                  </label>
+                ))}
+                {tags.length === 0 && (
+                  <p className="text-xs text-slate-500 italic">
+                    No tags found. Create one in Tags page.
                   </p>
                 )}
               </div>
