@@ -1,7 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { Portfolio, Post, Category, Tag } from "@/lib/types";
+import { Project, Post, Category, Tag } from "@/lib/types";
 
 // Ensure we are using the private environment variables
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -46,45 +46,45 @@ export const createClient = async () => {
 
 export const getProjects = async () => {
   const supabase = await createClient();
-  const { data: portfolios, error } = await supabase
-    .from("portfolios")
+  const { data: projects, error } = await supabase
+    .from("projects")
     .select("*")
     .eq("status", "published")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
-    .returns<Portfolio[]>();
+    .returns<Project[]>();
 
   if (error) throw new Error(`Supabase error: ${error.message}`);
-  return portfolios || [];
+  return projects || [];
 };
 
 export const getFeaturedProjects = async (limit = 3) => {
   const supabase = await createClient();
-  const { data: portfolios, error } = await supabase
-    .from("portfolios")
+  const { data: projects, error } = await supabase
+    .from("projects")
     .select("*")
     .eq("status", "published")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(limit)
-    .returns<Portfolio[]>();
+    .returns<Project[]>();
 
   if (error) throw new Error(`Supabase error: ${error.message}`);
-  return portfolios || [];
+  return projects || [];
 };
 
 export const getProjectBySlug = async (slug: string) => {
   const supabase = await createClient();
-  const { data: portfolio, error } = await supabase
-    .from("portfolios")
+  const { data: project, error } = await supabase
+    .from("projects")
     .select("*")
     .eq("slug", slug)
     .eq("status", "published")
     .is("deleted_at", null)
-    .single<Portfolio>();
+    .single<Project>();
 
   if (error) return null;
-  return portfolio;
+  return project;
 };
 
 export const getPosts = async (search?: string, categorySlug?: string) => {
@@ -111,7 +111,7 @@ export const getPosts = async (search?: string, categorySlug?: string) => {
   let query = supabase
     .from("posts")
     .select(
-      "*, post_cats:post_categories(category:categories(id, name, slug)), author:profiles(full_name, avatar_url)",
+      "*, post_cats:post_categories(category:categories(id, name, slug, color, description)), author:profiles(full_name, avatar_url)",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -204,7 +204,7 @@ export const getPaginatedPosts = async (
   let query = supabase
     .from("posts")
     .select(
-      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
+      "*, post_cats:post_categories(category:categories(id, name, slug, color, description)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
       { count: "exact" },
     )
     .eq("status", "published")
@@ -275,7 +275,7 @@ export const getRecentPosts = async (limit = 5) => {
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug))",
+      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug, color, description))",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -310,7 +310,7 @@ export const getPopularPosts = async (limit = 5) => {
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, published_at, views, post_cats:post_categories(category:categories(id, name, slug))",
+      "id, title, slug, published_at, views, post_cats:post_categories(category:categories(id, name, slug, color, description))",
     )
     .eq("status", "published")
     .is("deleted_at", null)
@@ -349,6 +349,18 @@ export const getCategories = async () => {
 
   if (error) throw new Error(`Supabase error: ${error.message}`);
   return categories || [];
+};
+
+export const getCategoryBySlug = async (slug: string) => {
+  const supabase = await createClient();
+  const { data: category, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) return null;
+  return category as Category;
 };
 
 export const createCategory = async (category: Partial<Category>) => {
@@ -416,7 +428,7 @@ export const getPostBySlug = async (slug: string) => {
   const { data: post, error } = await supabase
     .from("posts")
     .select(
-      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
+      "*, post_cats:post_categories(category:categories(id, name, slug, color, description)), post_tags:post_tags(tag:tags(id, name, slug)), author:profiles(full_name, avatar_url)",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -442,7 +454,7 @@ export const getPostBySlug = async (slug: string) => {
 
 export const getOwnerProfile = async () => {
   const supabase = await createClient();
-  // Assuming single-user blog/portfolio, fetch the first profile
+  // Assuming single-user blog/projects, fetch the first profile
   // In a multi-user app, you'd filter by role or specific ID
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -481,7 +493,7 @@ export const getDashboardPosts = async (
   let dbQuery = supabase
     .from("posts")
     .select(
-      "*, author:profiles(*), post_cats:post_categories(category:categories(id, name, slug))",
+      "*, author:profiles(*), post_cats:post_categories(category:categories(id, name, slug, color, description))",
       { count: "exact" },
     );
 
@@ -546,7 +558,7 @@ export const getPost = async (id: string) => {
   const { data: post, error } = await supabase
     .from("posts")
     .select(
-      "*, post_cats:post_categories(category:categories(id, name, slug)), post_tags:post_tags(tag:tags(id, name, slug))",
+      "*, post_cats:post_categories(category:categories(id, name, slug, color, description)), post_tags:post_tags(tag:tags(id, name, slug))",
     )
     .eq("id", id)
     .single();
@@ -676,7 +688,7 @@ export const getRelatedPosts = async (
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug))",
+      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug, color, description))",
     )
     .in("id", Array.from(candidateIds))
     .eq("status", "published")
@@ -698,4 +710,81 @@ export const getRelatedPosts = async (
         .filter((c: any) => c !== null),
     };
   }) as Post[];
+};
+
+// Authors
+export const getProfileByUsername = async (username: string) => {
+  const supabase = await createClient();
+  // Since we don't have a username column, we fetch all profiles and filter by slugified name
+  // This is not efficient for large datasets but acceptable for < 100 users
+  const { data: profiles, error } = await supabase.from("profiles").select("*");
+
+  if (error) return null;
+
+  // Simple slugify for comparison
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-");
+
+  const profile = profiles.find((p) => slugify(p.full_name || "") === username);
+
+  return profile || null;
+};
+
+export const getPostsByAuthor = async (
+  authorId: string,
+  page = 1,
+  limit = 10,
+) => {
+  const supabase = await createClient();
+  const offset = (page - 1) * limit;
+
+  const {
+    data: posts,
+    error,
+    count,
+  } = await supabase
+    .from("posts")
+    .select(
+      "id, title, slug, published_at, thumbnail, excerpt, post_cats:post_categories(category:categories(id, name, slug, color, description))",
+      { count: "exact" },
+    )
+    .eq("author_id", authorId)
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("published_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.error("Error fetching author posts:", error);
+    return { data: [], meta: { total: 0, page, limit, last_page: 0 } };
+  }
+
+  // Transform
+  const transformedData = (posts || []).map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = post as any;
+    return {
+      ...p,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      categories: p.post_cats
+        .map((c: any) => c.category)
+        .filter((c: any) => c !== null),
+    };
+  }) as Post[];
+
+  return {
+    data: transformedData,
+    meta: {
+      total: count || 0,
+      page,
+      limit,
+      last_page: Math.ceil((count || 0) / limit),
+    },
+  };
 };

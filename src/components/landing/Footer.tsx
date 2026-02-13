@@ -53,28 +53,28 @@ export function Footer() {
                 <Link
                   href="https://facebook.com"
                   target="_blank"
-                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                  className="text-slate-500 hover:text-(--primary-hover) transition"
                 >
                   <Facebook size={20} />
                 </Link>
                 <Link
                   href="https://instagram.com"
                   target="_blank"
-                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                  className="text-slate-500 hover:text-(--primary-hover) transition"
                 >
                   <Instagram size={20} />
                 </Link>
                 <Link
                   href="https://linkedin.com"
                   target="_blank"
-                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                  className="text-slate-500 hover:text-(--primary-hover) transition"
                 >
                   <Linkedin size={20} />
                 </Link>
                 <Link
                   href="https://tiktok.com"
                   target="_blank"
-                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                  className="text-slate-500 hover:text-(--primary-hover) transition"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -94,7 +94,7 @@ export function Footer() {
                 <Link
                   href="https://youtube.com"
                   target="_blank"
-                  className="text-slate-500 hover:text-[var(--primary-hover)] transition"
+                  className="text-slate-500 hover:text-(--primary-hover) transition"
                 >
                   <Youtube size={20} />
                 </Link>
@@ -114,8 +114,11 @@ export function Footer() {
                       </Link>
                     </li>
                     <li>
-                      <Link href="#" className="hover:text-primary transition">
-                        Portfolio
+                      <Link
+                        href="/projects"
+                        className="hover:text-primary transition"
+                      >
+                        Projects
                       </Link>
                     </li>
                     <li>

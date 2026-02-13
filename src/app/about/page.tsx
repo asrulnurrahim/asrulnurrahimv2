@@ -31,7 +31,7 @@ export default function AboutPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "Asrul Nurrahim",
+    name: "Asrul Nur Rahim",
     jobTitle: "Front-End Developer",
     description:
       "Front-End Developer with strong visual skills and high attention to detail.",

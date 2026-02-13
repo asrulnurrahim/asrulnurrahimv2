@@ -61,8 +61,16 @@ export async function BlogSection() {
                 <div className="mb-4 flex items-center justify-between text-xs">
                   {post.category && (
                     <Link
-                      href={`/blog?category=${post.category.slug}`}
+                      href={`/blog/category/${post.category.slug}`}
                       className="relative z-10 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                      style={
+                        post.category.color
+                          ? {
+                              backgroundColor: `${post.category.color}20`,
+                              color: post.category.color,
+                            }
+                          : {}
+                      }
                     >
                       {post.category.name}
                     </Link>

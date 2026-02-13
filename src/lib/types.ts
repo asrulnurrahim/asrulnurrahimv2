@@ -11,6 +11,8 @@ export interface Category {
   slug: string;
   created_at: string;
   posts?: { count: number }[];
+  description?: string | null;
+  color?: string | null;
 }
 
 export interface Profile {
@@ -23,10 +25,11 @@ export interface Profile {
   created_at: string;
 }
 
-export interface Portfolio {
+export interface Project {
   id: string;
   title: string;
   slug: string;
+  thumbnail_url: string | null;
   summary: string | null;
   problem: string | null;
   solution: string | null;

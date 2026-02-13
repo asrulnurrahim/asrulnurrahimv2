@@ -200,7 +200,17 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
                     <td className="py-3 px-4">
                       {post.categories && post.categories.length > 0 ? (
                         <div className="flex items-center gap-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            style={
+                              post.categories[0].color
+                                ? {
+                                    backgroundColor: `${post.categories[0].color}20`,
+                                    color: post.categories[0].color,
+                                  }
+                                : {}
+                            }
+                          >
                             {post.categories[0].name}
                           </span>
                           {post.categories.length > 1 && (

@@ -19,7 +19,13 @@ export async function incrementView(slug: string) {
 export async function createTag(prevState: any, formData: FormData) {
   const supabase = await createClient();
   const name = formData.get("name") as string;
-  const slug = name
+  let slug = formData.get("slug") as string;
+
+  if (!slug) {
+    slug = name;
+  }
+
+  slug = slug
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
@@ -38,7 +44,13 @@ export async function updateTag(prevState: any, formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
-  const slug = name
+  let slug = formData.get("slug") as string;
+
+  if (!slug) {
+    slug = name;
+  }
+
+  slug = slug
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");

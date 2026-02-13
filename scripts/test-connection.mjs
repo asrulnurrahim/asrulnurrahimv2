@@ -19,10 +19,10 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function testConnection() {
   try {
-    // 1. Test basic connection by fetching a single row from portfolios
+    // 1. Test basic connection by fetching a single row from projects
     // We use .select('count') to be lightweight
     const { count, error } = await supabase
-      .from("portfolios")
+      .from("projects")
       .select("*", { count: "exact", head: true });
 
     if (error) {
@@ -32,14 +32,14 @@ async function testConnection() {
         console.error("   Hint: JWT or RLS issue. Check your policies.");
       } else if (error.code === "42P01") {
         console.error(
-          '   Hint: Table "portfolios" does not exist. Did you run the schema?',
+          '   Hint: Table "projects" does not exist. Did you run the schema?',
         );
       }
       process.exit(1);
     }
 
     console.log(
-      `✅ Connection Successful! Found ${count} items in "portfolios".`,
+      `✅ Connection Successful! Found ${count} items in "projects".`,
     );
 
     // 2. Test Posts connection

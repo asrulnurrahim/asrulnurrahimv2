@@ -2,149 +2,112 @@ import {
   getPaginatedPosts,
   getCategories,
   getPopularPosts,
+  getCategoryBySlug,
   getTags,
 } from "@/services/db";
 import Link from "next/link";
-import { Eye, Folder, Search } from "lucide-react";
-
-import SearchInput from "./components/SearchInput";
-import Pagination from "@/components/ui/Pagination";
-import { redirect } from "next/navigation";
-
+import { Eye, Folder } from "lucide-react";
+import { notFound } from "next/navigation";
 import { Metadata } from "next";
+
+import SearchInput from "@/app/blog/components/SearchInput";
+import Pagination from "@/components/ui/Pagination";
 
 export const revalidate = 60; // Revalidate every minute
 
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ search?: string; page?: string }>;
+}
+
 export async function generateMetadata({
+  params,
   searchParams,
-}: {
-  searchParams: Promise<{ search?: string; category?: string; page?: string }>;
-}): Promise<Metadata> {
-  const params = await searchParams;
-  const isFiltered = !!params.category || !!params.search;
-  const page = Number(params.page) || 1;
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { page } = await searchParams;
+  const category = await getCategoryBySlug(slug);
 
-  let title = `Blog${page > 1 ? ` - Page ${page}` : ""}`;
-
-  if (params.category) {
-    const categories = await getCategories();
-    const category = categories.find((c) => c.slug === params.category);
-    if (category) {
-      title = `${category.name}${page > 1 ? ` - Page ${page}` : ""} | Blog`;
-    }
-  } else if (params.search) {
-    title = `Search: "${params.search}" | Blog`;
+  if (!category) {
+    return {
+      title: "Category Not Found",
+    };
   }
 
-  const canonicalUrl = `${
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  }/blog${page > 1 ? `?page=${page}` : ""}`;
+  const pageNum = Number(page) || 1;
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/category/${slug}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
 
   return {
-    title,
-    description: "Insights, tutorials, and thoughts on software engineering.",
-    robots: {
-      index: !isFiltered,
-      follow: true,
-    },
+    title: `${category.name}${pageNum > 1 ? ` - Page ${pageNum}` : ""} | Blog`,
+    description:
+      category.description ||
+      `Posts in category ${category.name}. Insights, tutorials, and thoughts on software engineering.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title,
-      description: "Insights, tutorials, and thoughts on software engineering.",
+      title: `${category.name} | Blog`,
+      description: category.description || `Posts in category ${category.name}`,
       url: canonicalUrl,
       type: "website",
     },
   };
 }
 
-export default async function BlogPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ search?: string; category?: string; page?: string }>;
-}) {
-  const params = await searchParams;
-  const search = params.search;
-  const category = params.category;
+export default async function CategoryPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const { search, page } = await searchParams;
 
-  if (category) {
-    redirect(`/blog/category/${category}`);
+  const category = await getCategoryBySlug(slug);
+
+  if (!category) {
+    notFound();
   }
 
-  const page = Number(params.page) || 1;
+  const pageNum = Number(page) || 1;
   const limit = 10;
 
   const [postsRes, categories, popularPosts, tags] = await Promise.all([
-    getPaginatedPosts(page, limit, search, category),
+    getPaginatedPosts(pageNum, limit, search, slug),
     getCategories(),
     getPopularPosts(5),
     getTags(),
   ]);
 
   const { data: posts, meta } = postsRes;
-  const activeCategory = category
-    ? categories.find((c) => c.slug === category)
-    : null;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: "Asrul Nur Rahim Blog",
-    description: "Insights, tutorials, and thoughts on software engineering.",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
-    author: {
-      "@type": "Person",
-      name: "Asrul Nur Rahim",
-    },
-    blogPost: posts.map((post) => ({
-      "@type": "BlogPosting",
-      headline: post.title,
-      datePublished: post.published_at,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-30 pb-16">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-12 text-center">
-          {activeCategory ? (
-            <div className="inline-flex items-center justify-center p-3 mb-4 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <Folder className="w-6 h-6" />
-            </div>
-          ) : search ? (
-            <div className="inline-flex items-center justify-center p-3 mb-4 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-              <Search className="w-6 h-6" />
-            </div>
-          ) : null}
+          <div
+            className="inline-flex items-center justify-center p-3 mb-4 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+            style={
+              category.color
+                ? {
+                    backgroundColor: `${category.color}20`,
+                    color: category.color,
+                  }
+                : {}
+            }
+          >
+            <Folder className="w-6 h-6" />
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            {activeCategory
-              ? activeCategory.name
-              : search
-                ? "Search Results"
-                : "Blog"}
+            {category.name}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            {activeCategory ? (
+            {category.description || (
               <>
                 Posts in category{" "}
-                <span className="font-semibold">{activeCategory.name}</span>
-              </>
-            ) : search ? (
-              <>
-                Search results for{" "}
-                <span className="font-semibold text-pretty italic">
-                  &quot;{search}&quot;
+                <span
+                  className="font-semibold"
+                  style={category.color ? { color: category.color } : {}}
+                >
+                  {category.name}
                 </span>
               </>
-            ) : (
-              "Insights, tutorials, and thoughts on software engineering."
             )}
           </p>
         </div>
@@ -235,10 +198,28 @@ export default async function BlogPage({
                     {post.excerpt}
                   </p>
 
-                  <div className="mt-auto">
+                  <div className="mt-auto flex items-center justify-between">
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-300">
                       By {post.author?.full_name || "Admin"}
                     </p>
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex -space-x-2">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag.id}
+                            className="relative z-10 inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold text-white bg-blue-500 border-2 border-white rounded-full dark:border-gray-900"
+                            title={tag.name}
+                          >
+                            #
+                          </span>
+                        ))}
+                        {post.tags.length > 3 && (
+                          <span className="relative z-10 inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold text-white bg-gray-400 border-2 border-white rounded-full dark:border-gray-900">
+                            +{post.tags.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>
@@ -247,8 +228,15 @@ export default async function BlogPage({
             {posts.length === 0 && (
               <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">
-                  No posts found.
+                  No posts found in category{" "}
+                  <span className="font-bold">{category.name}</span>.
                 </p>
+                <Link
+                  href="/blog"
+                  className="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Back to Blog
+                </Link>
               </div>
             )}
 
@@ -256,8 +244,8 @@ export default async function BlogPage({
             <Pagination
               currentPage={meta.page}
               totalPages={meta.last_page}
-              baseUrl="/blog"
-              searchParams={{ search, category }}
+              baseUrl={`/blog/category/${slug}`}
+              searchParams={{ search }}
             />
           </div>
 
@@ -302,20 +290,10 @@ export default async function BlogPage({
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/blog"
-                  className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                    !category
-                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
-                  }`}
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                 >
                   <span className="font-medium mr-1.5">All</span>
-                  <span
-                    className={`text-xs px-1.5 py-0.5 rounded-md ${
-                      !category
-                        ? "bg-gray-700 text-gray-200 dark:bg-gray-200 dark:text-gray-700"
-                        : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
-                    }`}
-                  >
+                  <span className="text-xs px-1.5 py-0.5 rounded-md bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400">
                     {categories.reduce(
                       (acc, cat) => acc + (cat.posts?.[0]?.count || 0),
                       0,
@@ -323,7 +301,7 @@ export default async function BlogPage({
                   </span>
                 </Link>
                 {categories.map((cat) => {
-                  const isActive = category === cat.slug;
+                  const isActive = slug === cat.slug;
                   return (
                     <Link
                       key={cat.id}
@@ -347,7 +325,7 @@ export default async function BlogPage({
                       <span
                         className={`text-xs px-1.5 py-0.5 rounded-md ${
                           isActive
-                            ? "bg-blue-500 text-blue-50"
+                            ? "bg-white/20 text-white"
                             : "bg-gray-200 text-gray-500 dark:bg-slate-900 dark:text-gray-400"
                         }`}
                       >
@@ -356,9 +334,6 @@ export default async function BlogPage({
                     </Link>
                   );
                 })}
-                {categories.length === 0 && (
-                  <p className="text-gray-500 text-sm">No topics found.</p>
-                )}
               </div>
             </div>
 
@@ -368,19 +343,16 @@ export default async function BlogPage({
                 Tags
               </h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
+                {tags.map((t) => (
                   <Link
-                    key={tag.id}
-                    href={`/blog/tag/${tag.slug}`}
+                    key={t.id}
+                    href={`/blog/tag/${t.slug}`}
                     className="inline-flex items-center px-3 py-1 rounded-lg text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-400 dark:hover:bg-slate-700 transition-colors"
                   >
                     <span className="mr-1">#</span>
-                    {tag.name}
+                    {t.name}
                   </Link>
                 ))}
-                {tags.length === 0 && (
-                  <p className="text-gray-500 text-sm">No tags found.</p>
-                )}
               </div>
             </div>
           </aside>

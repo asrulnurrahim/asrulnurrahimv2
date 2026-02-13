@@ -4,7 +4,7 @@ import { Hero } from "@/components/landing/Hero";
 // import { WorkingApps } from "@/components/landing/WorkingApps";
 // import { CallToAction } from "@/components/landing/CallToAction";
 // import { Testimonials } from "@/components/landing/Testimonials";
-import { PortfolioSection } from "@/components/landing/PortfolioSection";
+import { ProjectsSection } from "@/components/landing/ProjectsSection";
 import { BlogSection } from "@/components/landing/BlogSection";
 import { getOwnerProfile } from "@/services/db";
 
@@ -65,7 +65,7 @@ export default async function Home() {
         <Hero profile={profile} />
         {/* <Technologies /> */}
         {/* <FeatureCombo /> */}
-        <PortfolioSection />
+        <ProjectsSection />
         {/* <WorkingApps /> */}
         <BlogSection />
         {/* <CallToAction /> */}

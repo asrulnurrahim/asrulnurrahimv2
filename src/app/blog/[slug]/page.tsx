@@ -15,15 +15,15 @@ import {
   ChevronRight,
   Github,
   Linkedin,
-  Twitter,
   Instagram,
   Clock,
 } from "lucide-react";
 import ViewCounter from "@/components/blog/ViewCounter";
 import { processContent } from "@/lib/toc";
-import { calculateReadingTime } from "@/lib/utils";
+import { calculateReadingTime, slugify } from "@/lib/utils";
 import TableOfContents from "@/components/blog/TableOfContents";
 import ArticleContent from "@/components/blog/ArticleContent";
+import ShareButtons from "@/components/blog/ShareButtons";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -50,32 +50,62 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const title = post.seo_title || post.title;
+  const description = post.seo_description || post.excerpt || "";
+  const publishedTime = post.published_at || undefined;
+  const modifiedTime = post.updated_at || undefined;
+  const authors = [post.author?.full_name || "Asrul Nur Rahim"];
+
+  // Image handling with fallback
+  const ogImage = post.thumbnail
+    ? post.thumbnail.startsWith("http")
+      ? post.thumbnail
+      : `${siteUrl}${post.thumbnail}`
+    : `${siteUrl}/images/og-default.jpg`;
+
   return {
-    title: `${post.title} | Asrul Nurrahim`,
-    description: post.seo_description || post.excerpt,
+    title: title,
+    description: description,
+    keywords: post.tags?.map((t) => t.name),
+    authors: [{ name: authors[0], url: `${siteUrl}/about` }],
     openGraph: {
-      title: post.seo_title || post.title,
-      description: post.seo_description || post.excerpt || "",
+      title: title,
+      description: description,
       type: "article",
-      publishedTime: post.published_at || undefined,
-      authors: [post.author?.full_name || "Asrul Nurrahim"],
+      url: `${siteUrl}/blog/${post.slug}`,
+      siteName: "Asrul Nur Rahim Blog",
+      locale: "id_ID",
+      publishedTime,
+      modifiedTime,
+      authors,
       images: [
         {
-          url: post.thumbnail || "/images/og-default.jpg",
+          url: ogImage,
           width: 1200,
           height: 630,
-          alt: post.title,
+          alt: title,
+          type: "image/jpeg", // Assuming JPEG, could be dynamic if needed
         },
       ],
     },
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
-    },
     twitter: {
       card: "summary_large_image",
-      title: post.seo_title || post.title,
-      description: post.seo_description || post.excerpt || "",
-      images: [post.thumbnail || "/images/og-default.jpg"],
+      title: title,
+      description: description,
+      site: "@asrulnurrahim", // Replace with actual handle if available
+      creator: "@asrulnurrahim", // Replace with specific author handle if available
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: `${siteUrl}/blog/${post.slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
     },
   };
 }
@@ -170,7 +200,7 @@ export default async function BlogPostPage({ params }: Props) {
             <>
               <ChevronRight className="w-4 h-4 mx-2 text-gray-300 dark:text-gray-600" />
               <Link
-                href={`/blog?category=${post.categories[0].slug}`}
+                href={`/blog/category/${post.categories[0].slug}`}
                 className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 {post.categories[0].name}
@@ -191,8 +221,16 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.categories.map((cat) => (
                   <Link
                     key={cat.id}
-                    href={`/blog?category=${cat.slug}`}
+                    href={`/blog/category/${cat.slug}`}
                     className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                    style={
+                      cat.color
+                        ? {
+                            backgroundColor: `${cat.color}20`,
+                            color: cat.color,
+                          }
+                        : {}
+                    }
                   >
                     <Tag className="w-3 h-3 mr-1.5" />
                     {cat.name}
@@ -338,6 +376,14 @@ export default async function BlogPostPage({ params }: Props) {
               )}
             </article>
 
+            {/* Share Buttons */}
+            <div className="my-10 border-t border-b border-gray-100 dark:border-gray-800 py-6">
+              <ShareButtons
+                title={post.title}
+                url={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`}
+              />
+            </div>
+
             {/* Tags Section */}
             {post.tags && post.tags.length > 0 && (
               <div className="mt-8 flex flex-wrap gap-2">
@@ -358,27 +404,35 @@ export default async function BlogPostPage({ params }: Props) {
             {post.author && (
               <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
-                  <div className="shrink-0">
+                  <Link
+                    href={`/author/${slugify(post.author.full_name || "admin")}`}
+                    className="shrink-0 group"
+                  >
                     {post.author.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={post.author.avatar_url}
                         alt={post.author.full_name || "Author"}
-                        className="w-20 h-20 rounded-full object-cover border-4 border-gray-50 dark:border-gray-800"
+                        className="w-20 h-20 rounded-full object-cover border-4 border-gray-50 dark:border-gray-800 group-hover:border-blue-100 dark:group-hover:border-blue-900/50 transition-colors"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center border-4 border-gray-50 dark:border-gray-800">
+                      <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center border-4 border-gray-50 dark:border-gray-800 group-hover:border-blue-100 dark:group-hover:border-blue-900/50 transition-colors">
                         <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                       </div>
                     )}
-                  </div>
+                  </Link>
                   <div className="text-center sm:text-left flex-1">
                     <div className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">
                       About the Author
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                      {post.author.full_name || "Admin"}
-                    </h3>
+                    <Link
+                      href={`/author/${slugify(post.author.full_name || "admin")}`}
+                      className="hover:underline decoration-blue-500/30 underline-offset-4 transition-all"
+                    >
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {post.author.full_name || "Admin"}
+                      </h3>
+                    </Link>
                     <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                       {post.author.bio ||
                         post.author.headline ||
@@ -407,9 +461,16 @@ export default async function BlogPostPage({ params }: Props) {
                         href="#"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors"
+                        className="text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                        aria-label="X (Twitter)"
                       >
-                        <Twitter className="w-5 h-5" />
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-5 h-5"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
                       </a>
                       <a
                         href="#"
@@ -452,7 +513,14 @@ export default async function BlogPostPage({ params }: Props) {
                         )}
                       </div>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold">
+                        <div
+                          className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold"
+                          style={
+                            relatedPost.categories?.[0]?.color
+                              ? { color: relatedPost.categories[0].color }
+                              : {}
+                          }
+                        >
                           {relatedPost.categories?.[0]?.name || "Blog"}
                         </div>
                         <h4 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-tight">

@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getPosts, getProjects } from "@/services/db";
+import { getPosts, getCategories } from "@/services/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -7,28 +7,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const routes = ["", "/about", "/blog", "/projects"].map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: "daily" as const,
-    priority: 1,
+    lastModified: new Date().toISOString(),
+    changeFrequency: "monthly" as const,
+    priority: route === "" ? 1 : 0.8,
   }));
 
-  // Fetch posts
+  // Dynamic posts
   const posts = await getPosts();
   const postRoutes = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.updated_at || post.created_at),
+    lastModified: new Date(
+      post.updated_at || post.published_at || post.created_at,
+    ).toISOString(),
     changeFrequency: "weekly" as const,
-    priority: 0.8,
+    priority: 0.7,
   }));
 
-  // Fetch projects
-  const projects = await getProjects();
-  const projectRoutes = projects.map((project) => ({
-    url: `${baseUrl}/projects/${project.slug}`,
-    lastModified: new Date(project.updated_at || project.created_at),
+  // Dynamic categories
+  const categories = await getCategories();
+  const categoryRoutes = categories.map((category) => ({
+    url: `${baseUrl}/blog/category/${category.slug}`,
+    lastModified: new Date(category.created_at).toISOString(),
     changeFrequency: "weekly" as const,
-    priority: 0.8,
+    priority: 0.6,
   }));
 
-  return [...routes, ...postRoutes, ...projectRoutes];
+  return [...routes, ...postRoutes, ...categoryRoutes];
 }

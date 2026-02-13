@@ -17,9 +17,14 @@ export default function CategoriesPage() {
   const [isEditing, setIsEditing] = useState<string | null>(null); // ID of category being edited
   const [editName, setEditName] = useState("");
   const [editSlug, setEditSlug] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editColor, setEditColor] = useState("");
+
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newSlug, setNewSlug] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newColor, setNewColor] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -41,9 +46,16 @@ export default function CategoriesPage() {
   const handleCreate = async () => {
     if (!newName || !newSlug) return;
     try {
-      await createCategory({ name: newName, slug: newSlug });
+      await createCategory({
+        name: newName,
+        slug: newSlug,
+        description: newDescription,
+        color: newColor,
+      });
       setNewName("");
       setNewSlug("");
+      setNewDescription("");
+      setNewColor("");
       setIsCreating(false);
       fetchCategories();
       router.refresh();
@@ -56,7 +68,12 @@ export default function CategoriesPage() {
   const handleUpdate = async (id: string) => {
     if (!editName || !editSlug) return;
     try {
-      await updateCategory(id, { name: editName, slug: editSlug });
+      await updateCategory(id, {
+        name: editName,
+        slug: editSlug,
+        description: editDescription,
+        color: editColor,
+      });
       setIsEditing(null);
       fetchCategories();
       router.refresh();
@@ -82,6 +99,8 @@ export default function CategoriesPage() {
     setIsEditing(category.id);
     setEditName(category.name);
     setEditSlug(category.slug);
+    setEditDescription(category.description || "");
+    setEditColor(category.color || "");
   };
 
   const generateSlug = (name: string) => {
@@ -143,6 +162,31 @@ export default function CategoriesPage() {
                   placeholder="category-slug"
                 />
               </div>
+              <div className="flex-1 w-full">
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-sm"
+                  placeholder="Short description..."
+                />
+              </div>
+              <div className="w-24">
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Color
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={newColor || "#000000"}
+                    onChange={(e) => setNewColor(e.target.value)}
+                    className="h-9 w-9 p-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 cursor-pointer"
+                  />
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCreate}
@@ -188,11 +232,25 @@ export default function CategoriesPage() {
                       }}
                       className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-sm"
                     />
+
                     <input
                       type="text"
                       value={editSlug}
                       onChange={(e) => setEditSlug(e.target.value)}
                       className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-sm"
+                    />
+                    <input
+                      type="text"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Description"
+                      className="flex-[2] px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-sm"
+                    />
+                    <input
+                      type="color"
+                      value={editColor || "#000000"}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="h-9 w-9 p-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 cursor-pointer shrink-0"
                     />
                     <div className="flex items-center gap-2">
                       <button
@@ -220,6 +278,21 @@ export default function CategoriesPage() {
                           {category.slug}
                         </span>
                         <span>{category.posts?.[0]?.count || 0} posts</span>
+                        {category.color && (
+                          <span
+                            className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700"
+                            style={{ backgroundColor: category.color }}
+                            title={category.color}
+                          />
+                        )}
+                        {category.description && (
+                          <span
+                            className="text-xs text-gray-400 truncate max-w-[200px]"
+                            title={category.description}
+                          >
+                            {category.description}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

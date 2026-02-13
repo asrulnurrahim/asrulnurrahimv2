@@ -3,6 +3,7 @@ import {
   getCategories,
   getPopularPosts,
   getTagBySlug,
+  getTags,
 } from "@/services/db";
 import Link from "next/link";
 import { Eye, Tag as TagIcon } from "lucide-react";
@@ -37,13 +38,17 @@ export async function generateMetadata({
   const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/tag/${slug}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
 
   return {
-    title: `${tag.name} - Tag${pageNum > 1 ? ` - Page ${pageNum}` : ""} | Blog Asrul Nur Rahim`,
+    title: `${tag.name} - Tag${pageNum > 1 ? ` - Page ${pageNum}` : ""} | Blog`,
     description: `Posts tagged with ${tag.name}. Insights, tutorials, and thoughts on software engineering.`,
     alternates: {
       canonical: canonicalUrl,
     },
+    robots: {
+      index: false,
+      follow: true,
+    },
     openGraph: {
-      title: `${tag.name} - Tag | Blog Asrul Nur Rahim`,
+      title: `${tag.name} - Tag | Blog`,
       description: `Posts tagged with ${tag.name}`,
       url: canonicalUrl,
       type: "website",
@@ -64,10 +69,11 @@ export default async function TagPage({ params, searchParams }: Props) {
   const pageNum = Number(page) || 1;
   const limit = 10;
 
-  const [postsRes, categories, popularPosts] = await Promise.all([
+  const [postsRes, categories, popularPosts, tags] = await Promise.all([
     getPaginatedPosts(pageNum, limit, search, undefined, slug),
     getCategories(),
     getPopularPosts(5),
+    getTags(),
   ]);
 
   const { data: posts, meta } = postsRes;
@@ -122,7 +128,7 @@ export default async function TagPage({ params, searchParams }: Props) {
                       post.categories.map((cat) => (
                         <Link
                           key={cat.id}
-                          href={`/blog?category=${cat.slug}`}
+                          href={`/blog/category/${cat.slug}`}
                           className="relative z-10 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
                         >
                           {cat.name}
@@ -272,7 +278,7 @@ export default async function TagPage({ params, searchParams }: Props) {
                   return (
                     <Link
                       key={cat.id}
-                      href={`/blog?category=${cat.slug}`}
+                      href={`/blog/category/${cat.slug}`}
                       className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                     >
                       <span className="font-medium mr-1.5">{cat.name}</span>
@@ -282,6 +288,29 @@ export default async function TagPage({ params, searchParams }: Props) {
                     </Link>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Tags Widget */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Tags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/blog/tag/${t.slug}`}
+                    className={`inline-flex items-center px-3 py-1 rounded-lg text-xs transition-colors ${
+                      t.slug === slug
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-400 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    <span className="mr-1">#</span>
+                    {t.name}
+                  </Link>
+                ))}
               </div>
             </div>
           </aside>

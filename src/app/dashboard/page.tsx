@@ -10,7 +10,7 @@ export default function DashboardPage() {
             Dashboard
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Welcome back, Asrul Nurrahim
+            Welcome back, Asrul Nur Rahim
           </p>
         </div>
         <div className="flex gap-3">

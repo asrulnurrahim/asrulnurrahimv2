@@ -111,7 +111,15 @@ export default async function ProjectPage({ params }: Props) {
         </header>
 
         <div className="aspect-video w-full bg-gray-200 dark:bg-slate-900 rounded-2xl overflow-hidden mb-16 flex items-center justify-center relative shadow-sm">
-          <span className="text-6xl opacity-20">🚀</span>
+          {project.thumbnail_url ? (
+            <img
+              src={project.thumbnail_url}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-6xl opacity-20">🚀</span>
+          )}
         </div>
 
         <div className="grid md:grid-cols-3 gap-12">

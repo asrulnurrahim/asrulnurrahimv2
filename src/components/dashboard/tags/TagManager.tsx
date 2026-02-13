@@ -9,6 +9,9 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editSlug, setEditSlug] = useState("");
+  const [newSlug, setNewSlug] = useState("");
+  const [newName, setNewName] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -20,6 +23,8 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
         alert(res.message);
       } else {
         formRef.current?.reset();
+        setNewName("");
+        setNewSlug("");
       }
     } finally {
       setIsCreating(false);
@@ -37,14 +42,23 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
     }
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  };
+
   const startEdit = (tag: Tag) => {
     setEditingId(tag.id);
     setEditName(tag.name);
+    setEditSlug(tag.slug);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditName("");
+    setEditSlug("");
   };
 
   const handleUpdate = async () => {
@@ -54,6 +68,7 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
       const formData = new FormData();
       formData.append("id", editingId);
       formData.append("name", editName);
+      formData.append("slug", editSlug);
 
       const res = await updateTag(null, formData);
       if (res.message !== "Success") {
@@ -74,14 +89,36 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
           <TagIcon className="w-5 h-5" />
           Add New Tag
         </h3>
-        <form ref={formRef} action={handleCreate} className="flex gap-4">
-          <input
-            type="text"
-            name="name"
-            required
-            placeholder="Tag name (e.g. Next.js, React)"
-            className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          />
+        <form
+          ref={formRef}
+          action={handleCreate}
+          className="flex flex-col md:flex-row gap-4 w-full"
+        >
+          <div className="flex-1 space-y-2">
+            <input
+              type="text"
+              name="name"
+              required
+              value={newName}
+              onChange={(e) => {
+                setNewName(e.target.value);
+                setNewSlug(generateSlug(e.target.value));
+              }}
+              placeholder="Tag name (e.g. Next.js)"
+              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+          <div className="flex-1 space-y-2">
+            <input
+              type="text"
+              name="slug"
+              required
+              value={newSlug}
+              onChange={(e) => setNewSlug(e.target.value)}
+              placeholder="slug-url"
+              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
+            />
+          </div>
           <button
             type="submit"
             disabled={isCreating}
@@ -117,32 +154,49 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
               >
                 <div className="flex-1">
                   {editingId === tag.id ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleUpdate}
-                        disabled={loadingId === tag.id}
-                        className="p-1.5 bg-green-100 text-green-600 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
-                      >
-                        {loadingId === tag.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        disabled={loadingId === tag.id}
-                        className="p-1.5 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-400 dark:hover:bg-slate-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                    <div className="flex flex-col md:flex-row gap-2 w-full pr-4">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => {
+                            setEditName(e.target.value);
+                            setEditSlug(generateSlug(e.target.value));
+                          }}
+                          className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+                          autoFocus
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={editSlug}
+                          onChange={(e) => setEditSlug(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-mono"
+                          placeholder="Slug"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleUpdate}
+                          disabled={loadingId === tag.id}
+                          className="p-1.5 bg-green-100 text-green-600 rounded-md hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                        >
+                          {loadingId === tag.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          disabled={loadingId === tag.id}
+                          className="p-1.5 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-400 dark:hover:bg-slate-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div>
