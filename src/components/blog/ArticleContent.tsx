@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { createRoot } from "react-dom/client";
 
@@ -44,12 +44,7 @@ export default function ArticleContent({ content }: ArticleContentProps) {
 }
 
 function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = React.useState(false);
-
-  // We need to access React.useState, but since this is inside a file module,
-  // we should just use standard useState imported at top.
-  // Wait, I can't use React.useState if I didn't import React as default or namespace.
-  // I'll fix imports below.
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -64,16 +59,24 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className={`p-2 rounded-lg backdrop-blur-md border transition-all duration-200 ${
+      className={`flex items-center gap-2 p-2 rounded-lg backdrop-blur-md border transition-all duration-200 ${
         copied
           ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
           : "bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700/50"
       }`}
       aria-label="Copy code"
     >
-      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      {copied ? (
+        <>
+          <Check className="w-4 h-4" />
+          <span>Copied</span>
+        </>
+      ) : (
+        <>
+          <Copy className="w-4 h-4" />
+          <span>Copy code</span>
+        </>
+      )}
     </button>
   );
 }
-// Helper to fix the missing React import for the inline component
-import React, { useState } from "react";
