@@ -31,3 +31,23 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Environment Safety
+.env
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+
