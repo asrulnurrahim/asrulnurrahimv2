@@ -113,7 +113,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               <a
                 href={`#${heading.id}`}
                 onClick={(e) => handleClick(e, heading.id)}
-                className={`-ml-[1px] block border-l-2 py-1 pl-4 transition-all duration-200 ${
+                className={`-ml-px block border-l-2 py-1 pl-4 transition-all duration-200 ${
                   activeId === heading.id
                     ? "border-blue-600 font-medium text-blue-600 dark:border-blue-400 dark:text-blue-400"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200"

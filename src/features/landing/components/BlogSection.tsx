@@ -58,7 +58,7 @@ export async function BlogSection() {
                     <span className="text-4xl opacity-50">🖼️</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
               {/* Content */}
               <div className="flex flex-1 flex-col p-6">
