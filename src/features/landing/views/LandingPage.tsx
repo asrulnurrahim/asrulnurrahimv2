@@ -1,12 +1,7 @@
 import { getOwnerProfile } from "@/features/profile/services";
 import { Hero } from "../components/Hero";
-// import { Technologies } from "../components/Technologies";
-// import { FeatureCombo } from "../components/FeatureCombo";
 import { ProjectsSection } from "../components/ProjectsSection";
-// import { WorkingApps } from "../components/WorkingApps";
 import { BlogSection } from "../components/BlogSection";
-// import { CallToAction } from "../components/CallToAction";
-// import { Testimonials } from "../components/Testimonials";
 
 export async function LandingPage() {
   const profile = await getOwnerProfile();
@@ -44,13 +39,8 @@ export async function LandingPage() {
       />
       <div className="min-h-screen bg-white dark:bg-slate-950">
         <Hero profile={profile} />
-        {/* <Technologies /> */}
-        {/* <FeatureCombo /> */}
         <ProjectsSection />
-        {/* <WorkingApps /> */}
         <BlogSection />
-        {/* <CallToAction /> */}
-        {/* <Testimonials /> */}
       </div>
     </>
   );
