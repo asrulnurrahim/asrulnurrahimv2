@@ -31,19 +31,19 @@ export default function Pagination({
   const hasNext = currentPage < totalPages;
 
   return (
-    <div className="flex justify-center items-center gap-4 mt-12">
+    <div className="mt-12 flex items-center justify-center gap-4">
       {hasPrev ? (
         <Link
           href={createPageUrl(currentPage - 1)}
-          className="flex items-center px-4 py-2 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
           rel="prev"
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
+          <ChevronLeft className="mr-2 h-4 w-4" />
           Previous
         </Link>
       ) : (
-        <span className="flex items-center px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">
-          <ChevronLeft className="w-4 h-4 mr-2" />
+        <span className="flex cursor-not-allowed items-center rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-gray-400 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-600">
+          <ChevronLeft className="mr-2 h-4 w-4" />
           Previous
         </span>
       )}
@@ -55,16 +55,16 @@ export default function Pagination({
       {hasNext ? (
         <Link
           href={createPageUrl(currentPage + 1)}
-          className="flex items-center px-4 py-2 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
           rel="next"
         >
           Next
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <ChevronRight className="ml-2 h-4 w-4" />
         </Link>
       ) : (
-        <span className="flex items-center px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+        <span className="flex cursor-not-allowed items-center rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-gray-400 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-600">
           Next
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <ChevronRight className="ml-2 h-4 w-4" />
         </span>
       )}
     </div>

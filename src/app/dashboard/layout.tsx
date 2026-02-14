@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 
 export const metadata: Metadata = {
   title: "Dashboard - Asrul Nur Rahim",

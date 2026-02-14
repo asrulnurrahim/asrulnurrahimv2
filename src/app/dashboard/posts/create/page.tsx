@@ -1,9 +1,5 @@
-import { PostForm } from "@/components/dashboard/posts/PostForm";
+import { PostEditor } from "@/features/dashboard/views";
 
 export default function CreatePostPage() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <PostForm />
-    </div>
-  );
+  return <PostEditor />;
 }

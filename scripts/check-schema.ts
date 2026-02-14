@@ -15,18 +15,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-async function checkProfileSchema() {
-  const { data, error } = await supabase.from("profiles").select("*").limit(1);
-
-  if (error) {
-    console.error("Error fetching profiles:", error);
-  } else if (data && data.length > 0) {
-    console.log("Profile keys:", Object.keys(data[0]));
-  } else {
-    console.log("No profiles found to inspect.");
-  }
-}
-
 async function checkPostsSchema() {
   const { data, error } = await supabase.from("posts").select("*").limit(1);
 
@@ -39,5 +27,4 @@ async function checkPostsSchema() {
   }
 }
 
-// checkProfileSchema();
 checkPostsSchema();

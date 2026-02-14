@@ -30,6 +30,8 @@ export function slugify(text: string): string {
   return text
     .toString()
     .toLowerCase()
+    .normalize("NFD") // Split accented characters into their base chars and diacritical marks
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritical marks
     .trim()
     .replace(/\s+/g, "-") // Replace spaces with -
     .replace(/[^\w-]+/g, "") // Remove all non-word chars

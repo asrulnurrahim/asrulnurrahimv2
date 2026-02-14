@@ -74,30 +74,31 @@ export function UserMenu() {
   return (
     <DropdownMenu.Root onOpenChange={setIsOpen} modal={false}>
       <DropdownMenu.Trigger asChild>
-        <button className="flex items-center gap-3 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full lg:rounded-lg transition-colors outline-none cursor-pointer group">
-          <div className="relative w-9 h-9 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
+        <button className="group flex cursor-pointer items-center gap-3 rounded-full p-1.5 transition-colors outline-none hover:bg-slate-100 lg:rounded-lg dark:hover:bg-slate-800">
+          <div className="relative h-9 w-9 overflow-hidden rounded-full border border-slate-200 dark:border-slate-700">
             {profile?.avatar_url ? (
-              <img
+              <Image
                 src={profile.avatar_url}
                 alt="Profile"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center text-xs text-slate-500 font-bold">
+              <div className="flex h-full w-full items-center justify-center bg-slate-300 text-xs font-bold text-slate-500 dark:bg-slate-600">
                 {profile?.full_name?.charAt(0) || user.email?.charAt(0)}
               </div>
             )}
           </div>
-          <div className="hidden xl:block text-left mr-1">
-            <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">
+          <div className="mr-1 hidden text-left xl:block">
+            <p className="text-sm leading-tight font-semibold text-slate-900 dark:text-white">
               {profile?.full_name || "User"}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
+            <p className="text-xs leading-tight text-slate-500 dark:text-slate-400">
               {profile?.headline || "Member"}
             </p>
           </div>
           <div
-            className={`hidden xl:block text-slate-500 dark:text-slate-400 transition-transform duration-200 ${
+            className={`hidden text-slate-500 transition-transform duration-200 xl:block dark:text-slate-400 ${
               isOpen ? "rotate-180" : ""
             }`}
           >
@@ -108,15 +109,15 @@ export function UserMenu() {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="min-w-[240px] bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-800 p-1 mr-4 z-50 animate-in fade-in zoom-in-95 duration-200 slide-in-from-top-2"
+          className="animate-in fade-in zoom-in-95 slide-in-from-top-2 z-50 mr-4 min-w-[240px] rounded-lg border border-slate-200 bg-white p-1 shadow-xl duration-200 dark:border-slate-800 dark:bg-slate-900"
           sideOffset={5}
           align="end"
         >
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 mb-1">
+          <div className="mb-1 border-b border-gray-100 px-4 py-3 dark:border-gray-800">
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
               {profile?.full_name || "User"}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
               {user.email}
             </p>
           </div>
@@ -125,7 +126,7 @@ export function UserMenu() {
             <DropdownMenu.Item asChild>
               <Link
                 href="/dashboard"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-md transition-colors cursor-pointer outline-none"
+                className="flex cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors outline-none hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
               >
                 <LayoutDashboard
                   size={16}
@@ -138,7 +139,7 @@ export function UserMenu() {
             <DropdownMenu.Item asChild>
               <Link
                 href="/dashboard/settings"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-md transition-colors cursor-pointer outline-none"
+                className="flex cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors outline-none hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
               >
                 <Settings
                   size={16}
@@ -152,7 +153,7 @@ export function UserMenu() {
           <DropdownMenu.Separator className="my-1 h-px bg-gray-100 dark:bg-gray-800" />
 
           <DropdownMenu.Item
-            className="flex items-center px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md cursor-pointer outline-none transition-colors"
+            className="flex cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium text-red-600 transition-colors outline-none hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/10"
             onSelect={handleSignOut}
           >
             <LogOut size={16} className="mr-3" />

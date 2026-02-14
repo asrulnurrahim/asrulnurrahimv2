@@ -1,4 +1,4 @@
-import { getPosts } from "@/services/db";
+import { getPosts } from "@/features/blog/services";
 
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
