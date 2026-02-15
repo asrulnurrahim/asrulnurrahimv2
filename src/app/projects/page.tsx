@@ -3,18 +3,29 @@ import { Metadata } from "next";
 
 export const revalidate = 60;
 
+import { siteConfig } from "@/lib/site-config";
+
 export const metadata: Metadata = {
   title: "Projects",
   description: "Showcase of my recent projects, applications, and experiments.",
+  keywords: ["Projects", "Portfolio", "Case Studies", ...siteConfig.keywords],
   openGraph: {
-    title: "Projects",
+    title: "Projects | Asrul Nur Rahim",
     description:
       "Showcase of my recent projects, applications, and experiments.",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
+    url: `${siteConfig.url}/projects`,
     type: "website",
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: "Projects",
+      },
+    ],
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
+    canonical: `${siteConfig.url}/projects`,
   },
 };
 

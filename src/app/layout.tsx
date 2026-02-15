@@ -12,50 +12,40 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+import { siteConfig } from "@/lib/site-config";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  ),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
-    template: "%s | Asrul Nur Rahim",
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.author}`,
   },
-  description:
-    "Personal website of Asrul Nur Rahim. Specializing in pixel-perfect UI, performance optimization, and scalable front-end architecture.",
-  keywords: [
-    "Front-End Engineer",
-    "UI Architect",
-    "React Developer",
-    "Next.js Expert",
-    "TypeScript",
-    "Tailwind CSS",
-  ],
-  authors: [{ name: "Asrul Nur Rahim", url: "https://asrulnurrahim.com" }],
-  creator: "Asrul Nur Rahim",
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  authors: [{ name: siteConfig.author, url: siteConfig.url }],
+  creator: siteConfig.author,
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
-    description:
-      "Crafting high-performance web experiences with precision and passion.",
-    siteName: "Asrul Nur Rahim",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    siteName: siteConfig.author,
     images: [
       {
-        url: "/asrul.jpg", // Ensure this image exists, or update
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: "Asrul Nur Rahim",
+        alt: siteConfig.author,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
-    description:
-      "Crafting high-performance web experiences with precision and passion.",
-    images: ["/asrul.jpg"],
-    creator: "@asrulnurrahim", // Update with actual handle if strictly known, otherwise generic
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+    creator: siteConfig.twitterHandle,
   },
   robots: {
     index: true,

@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
 import { Project } from "@/features/projects/types";
 

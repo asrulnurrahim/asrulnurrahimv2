@@ -7,6 +7,7 @@ import {
 } from "@/features/blog/services";
 import Link from "next/link";
 import Image from "next/image";
+import { siteConfig } from "@/lib/site-config";
 import { Eye, Folder, Search, Tag as TagIcon } from "lucide-react";
 
 import { SearchInput } from "../components";
@@ -96,7 +97,7 @@ export default async function BlogList({
     "@type": "Blog",
     name: "Asrul Nur Rahim Blog",
     description: "Insights, tutorials, and thoughts on software engineering.",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog`,
+    url: `${siteConfig.url}/blog`,
     author: {
       "@type": "Person",
       name: "Asrul Nur Rahim",
@@ -105,7 +106,7 @@ export default async function BlogList({
       "@type": "BlogPosting",
       headline: post.title,
       datePublished: post.published_at,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+      url: `${siteConfig.url}/blog/${post.slug}`,
     })),
   };
 

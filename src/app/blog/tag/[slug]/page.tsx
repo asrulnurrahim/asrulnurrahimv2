@@ -2,6 +2,8 @@ import { BlogList } from "@/features/blog/views";
 import { getTagBySlug } from "@/features/blog/services";
 import { Metadata } from "next";
 
+import { siteConfig } from "@/lib/site-config";
+
 export const revalidate = 60; // Revalidate every minute
 
 interface Props {
@@ -24,7 +26,7 @@ export async function generateMetadata({
   }
 
   const pageNum = Number(page) || 1;
-  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/tag/${slug}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
+  const canonicalUrl = `${siteConfig.url}/blog/tag/${slug}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
 
   return {
     title: `${tag.name} - Tag${pageNum > 1 ? ` - Page ${pageNum}` : ""} | Blog`,

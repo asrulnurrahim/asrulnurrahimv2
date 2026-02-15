@@ -5,6 +5,7 @@ import {
 } from "@/features/blog/services";
 import Link from "next/link";
 import Image from "next/image";
+import { siteConfig } from "@/lib/site-config";
 import { notFound } from "next/navigation";
 import {
   Calendar,
@@ -69,26 +70,24 @@ export default async function BlogDetail({ slug }: BlogDetailProps) {
     dateModified: post.updated_at || post.published_at,
     image: post.thumbnail
       ? [post.thumbnail]
-      : [
-          `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/images/og-default.jpg`,
-        ],
+      : [`${siteConfig.url}${siteConfig.ogImage}`],
     author: {
       "@type": "Person",
-      name: post.author?.full_name || "Asrul Nur Rahim",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/about`,
+      name: post.author?.full_name || siteConfig.author,
+      url: `${siteConfig.url}/about`,
     },
     publisher: {
       "@type": "Person",
-      name: "Asrul Nur Rahim",
+      name: siteConfig.author,
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/favicon-96x96.png`,
+        url: `${siteConfig.url}/favicon-96x96.png`,
       },
     },
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+    url: `${siteConfig.url}/blog/${post.slug}`,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`,
+      "@id": `${siteConfig.url}/blog/${post.slug}`,
     },
   };
 
@@ -249,7 +248,7 @@ export default async function BlogDetail({ slug }: BlogDetailProps) {
             <div className="my-10 border-t border-b border-gray-100 py-6 dark:border-gray-800">
               <ShareButtons
                 title={post.title}
-                url={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog/${post.slug}`}
+                url={`${siteConfig.url}/blog/${post.slug}`}
               />
             </div>
 

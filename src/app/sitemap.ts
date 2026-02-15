@@ -1,8 +1,9 @@
+import { siteConfig } from "@/lib/site-config";
 import { MetadataRoute } from "next";
 import { getPosts, getCategories } from "@/features/blog/services";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = siteConfig.url;
 
   // Static routes
   const routes = ["", "/about", "/blog", "/projects"].map((route) => ({

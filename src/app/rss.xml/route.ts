@@ -1,7 +1,8 @@
 import { getPosts } from "@/features/blog/services";
+import { siteConfig } from "@/lib/site-config";
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = siteConfig.url;
   const posts = await getPosts();
 
   const xml = `<?xml version="1.0" encoding="UTF-8" ?>

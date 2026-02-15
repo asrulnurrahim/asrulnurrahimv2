@@ -2,6 +2,7 @@ import { BlogDetail } from "@/features/blog/views";
 import { getPostBySlug, getPosts } from "@/features/blog/services";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { siteConfig } from "@/lib/site-config";
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -26,31 +27,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const title = post.seo_title || post.title;
   const description = post.seo_description || post.excerpt || "";
   const publishedTime = post.published_at || undefined;
   const modifiedTime = post.updated_at || undefined;
-  const authors = [post.author?.full_name || "Asrul Nur Rahim"];
+  const authors = [post.author?.full_name || siteConfig.author];
 
   // Image handling with fallback
   const ogImage = post.thumbnail
     ? post.thumbnail.startsWith("http")
       ? post.thumbnail
-      : `${siteUrl}${post.thumbnail}`
-    : `${siteUrl}/images/og-default.jpg`;
+      : `${siteConfig.url}${post.thumbnail}`
+    : `${siteConfig.url}${siteConfig.ogImage}`;
 
   return {
     title: title,
     description: description,
     keywords: post.tags?.map((t) => t.name),
-    authors: [{ name: authors[0], url: `${siteUrl}/about` }],
+    authors: [{ name: authors[0], url: `${siteConfig.url}/about` }],
     openGraph: {
       title: title,
       description: description,
       type: "article",
-      url: `${siteUrl}/blog/${post.slug}`,
-      siteName: "Asrul Nur Rahim Blog",
+      url: `${siteConfig.url}/blog/${post.slug}`,
+      siteName: `${siteConfig.author} Blog`,
       locale: "id_ID",
       publishedTime,
       modifiedTime,
@@ -69,12 +69,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: title,
       description: description,
-      site: "@asrulnurrahim",
-      creator: "@asrulnurrahim",
+      site: siteConfig.twitterHandle,
+      creator: siteConfig.twitterHandle,
       images: [ogImage],
     },
     alternates: {
-      canonical: `${siteUrl}/blog/${post.slug}`,
+      canonical: `${siteConfig.url}/blog/${post.slug}`,
     },
     robots: {
       index: true,

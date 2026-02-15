@@ -1,37 +1,52 @@
 import "server-only";
+import { createClient } from "@/lib/supabase/server";
 
 export const getDashboardStats = async () => {
-  // TODO: Replace with real data from database
+  const supabase = await createClient();
+
+  const [postsRes, projectsRes, categoriesRes, viewsRes, recentPostsRes] =
+    await Promise.all([
+      // Total Published Posts
+      supabase
+        .from("posts")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "published")
+        .is("deleted_at", null),
+
+      // Total Published Projects
+      supabase
+        .from("projects")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "published")
+        .is("deleted_at", null),
+
+      // Total Categories
+      supabase.from("categories").select("*", { count: "exact", head: true }),
+
+      // Total Views (Sum of all post views)
+      supabase.from("posts").select("views").is("deleted_at", null),
+
+      // Recent Posts
+      supabase
+        .from("posts")
+        .select(
+          "id, title, slug, published_at, status, views, categories(name, color)",
+        )
+        .is("deleted_at", null)
+        .order("published_at", { ascending: false })
+        .limit(5),
+    ]);
+
+  const totalViews =
+    viewsRes.data?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
+
   return {
-    totalUsers: { value: "4,250", trend: "+12%" },
-    totalSales: { value: "$45,250", trend: "+24%" },
-    revenue: { value: "$12,450", trend: "-5%" },
-    expenses: { value: "$4,250", trend: "+2%" },
-    recentTransactions: [
-      {
-        user: "John Doe",
-        date: "2023-11-04",
-        status: "Completed",
-        amount: "$450.00",
-      },
-      {
-        user: "Jane Smith",
-        date: "2023-11-03",
-        status: "Pending",
-        amount: "$120.50",
-      },
-      {
-        user: "Robert Brown",
-        date: "2023-11-02",
-        status: "Failed",
-        amount: "$65.00",
-      },
-      {
-        user: "Emily Davis",
-        date: "2023-11-01",
-        status: "Completed",
-        amount: "$1,200.00",
-      },
-    ],
+    counts: {
+      posts: postsRes.count || 0,
+      projects: projectsRes.count || 0,
+      categories: categoriesRes.count || 0,
+      views: totalViews,
+    },
+    recentPosts: recentPostsRes.data || [],
   };
 };

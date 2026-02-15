@@ -2,6 +2,8 @@ import { BlogList } from "@/features/blog/views";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { siteConfig } from "@/lib/site-config";
+
 export const revalidate = 60; // Revalidate every minute
 
 export async function generateMetadata({
@@ -19,9 +21,7 @@ export async function generateMetadata({
     title = `Search: "${params.search}" | Blog`;
   }
 
-  const canonicalUrl = `${
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  }/blog${page > 1 ? `?page=${page}` : ""}`;
+  const canonicalUrl = `${siteConfig.url}/blog${page > 1 ? `?page=${page}` : ""}`;
 
   return {
     title,

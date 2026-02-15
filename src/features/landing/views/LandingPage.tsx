@@ -1,4 +1,5 @@
 import { getOwnerProfile } from "@/features/profile/services";
+import { siteConfig } from "@/lib/site-config";
 import { Hero } from "../components/Hero";
 import { ProjectsSection } from "../components/ProjectsSection";
 import { BlogSection } from "../components/BlogSection";
@@ -10,20 +11,20 @@ export async function LandingPage() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Asrul Nur Rahim",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    url: siteConfig.url,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/blog?search={search_term_string}`,
+        urlTemplate: `${siteConfig.url}/blog?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
     author: {
       "@type": "Person",
-      name: "Asrul Nur Rahim",
+      name: siteConfig.author,
       jobTitle: "Front-End Engineer",
-      url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      url: siteConfig.url,
       sameAs: [
         "https://github.com/asrulnurrahim",
         "https://linkedin.com/in/asrulnurrahim",

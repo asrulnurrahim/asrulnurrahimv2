@@ -1,6 +1,7 @@
 import { getProjectBySlug, getProjects } from "@/features/projects/services";
 import { ProjectDetail } from "@/features/projects/views";
 import { Metadata } from "next";
+import { siteConfig } from "@/lib/site-config";
 
 export const revalidate = 60;
 
@@ -26,13 +27,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${project.title} | Projects`,
     description: project.seo_description || project.summary,
+    authors: [{ name: siteConfig.author, url: siteConfig.url }],
     openGraph: {
       title: project.seo_title || project.title,
       description: project.seo_description || project.summary || "",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects/${project.slug}`,
+      url: `${siteConfig.url}/projects/${project.slug}`,
       images: [
         {
-          url: "/images/og-project-default.jpg", // Update if project has image
+          url: siteConfig.ogImage, // Update if project has image
           width: 1200,
           height: 630,
           alt: project.title,
@@ -40,13 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects/${project.slug}`,
+      canonical: `${siteConfig.url}/projects/${project.slug}`,
     },
     twitter: {
       card: "summary_large_image",
       title: project.seo_title || project.title,
       description: project.seo_description || project.summary || "",
-      images: ["/images/og-project-default.jpg"],
+      images: [siteConfig.ogImage],
+      creator: siteConfig.twitterHandle,
     },
   };
 }

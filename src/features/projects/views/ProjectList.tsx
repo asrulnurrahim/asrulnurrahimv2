@@ -1,4 +1,5 @@
 import { getProjects } from "@/features/projects/services";
+import { siteConfig } from "@/lib/site-config";
 import Link from "next/link";
 import { Project } from "@/features/projects/types";
 import Image from "next/image";
@@ -12,12 +13,12 @@ export default async function ProjectList() {
     name: "Projects | Asrul Nur Rahim",
     description:
       "Showcase of my recent projects, applications, and experiments.",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects`,
+    url: `${siteConfig.url}/projects`,
     hasPart: projects.map((project: Project) => ({
       "@type": "CreativeWork",
       name: project.title,
       description: project.summary,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/projects/${project.slug}`,
+      url: `${siteConfig.url}/projects/${project.slug}`,
     })),
   };
 
