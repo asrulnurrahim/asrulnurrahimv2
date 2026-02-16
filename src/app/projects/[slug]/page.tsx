@@ -34,7 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${siteConfig.url}/projects/${project.slug}`,
       images: [
         {
-          url: siteConfig.ogImage, // Update if project has image
+          url: project.thumbnail
+            ? project.thumbnail.startsWith("http")
+              ? project.thumbnail
+              : `${siteConfig.url}${project.thumbnail}`
+            : siteConfig.ogImage,
           width: 1200,
           height: 630,
           alt: project.title,
