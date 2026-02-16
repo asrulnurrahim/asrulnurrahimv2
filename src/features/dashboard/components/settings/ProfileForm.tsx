@@ -4,6 +4,9 @@ import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema, type ProfileFormValues } from "@/lib/validation";
 
 interface ProfileFormProps {
   user: User;
@@ -22,23 +25,29 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
   } | null>(null);
   const supabase = createClient();
 
-  const [formData, setFormData] = useState({
-    full_name: profile?.full_name || "",
-    headline: profile?.headline || "",
-    bio: profile?.bio || "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      full_name: profile?.full_name || "",
+      headline: profile?.headline || "",
+      bio: profile?.bio || "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ProfileFormValues) => {
     setLoading(true);
     setMessage(null);
 
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: formData.full_name,
-        headline: formData.headline,
-        bio: formData.bio,
+        full_name: data.full_name,
+        headline: data.headline,
+        bio: data.bio,
       })
       .eq("id", user.id);
 
@@ -51,7 +60,7 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-12 gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-12 gap-6">
       <div className="col-span-12 sm:col-span-6">
         <label
           htmlFor="full_name"
@@ -62,13 +71,19 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
         <input
           id="full_name"
           type="text"
-          value={formData.full_name}
-          onChange={(e) =>
-            setFormData({ ...formData, full_name: e.target.value })
-          }
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          {...register("full_name")}
+          className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-900 dark:text-slate-100 ${
+            errors.full_name
+              ? "border-red-500 focus:ring-red-500"
+              : "border-slate-300 dark:border-slate-700"
+          }`}
           placeholder="Your full name"
         />
+        {errors.full_name && (
+          <p className="mt-1 text-sm text-red-500">
+            {errors.full_name.message}
+          </p>
+        )}
       </div>
 
       <div className="col-span-12 sm:col-span-6">
@@ -81,13 +96,17 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
         <input
           id="headline"
           type="text"
-          value={formData.headline}
-          onChange={(e) =>
-            setFormData({ ...formData, headline: e.target.value })
-          }
-          className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          {...register("headline")}
+          className={`flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-900 dark:text-slate-100 ${
+            errors.headline
+              ? "border-red-500 focus:ring-red-500"
+              : "border-slate-300 dark:border-slate-700"
+          }`}
           placeholder="Software Engineer, Designer..."
         />
+        {errors.headline && (
+          <p className="mt-1 text-sm text-red-500">{errors.headline.message}</p>
+        )}
       </div>
 
       <div className="col-span-12">
@@ -99,11 +118,17 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
         </label>
         <textarea
           id="bio"
-          value={formData.bio}
-          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-          className="flex min-h-[100px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          {...register("bio")}
+          className={`flex min-h-[100px] w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-900 dark:text-slate-100 ${
+            errors.bio
+              ? "border-red-500 focus:ring-red-500"
+              : "border-slate-300 dark:border-slate-700"
+          }`}
           placeholder="Tell us a little about yourself"
         />
+        {errors.bio && (
+          <p className="mt-1 text-sm text-red-500">{errors.bio.message}</p>
+        )}
       </div>
 
       {message && (

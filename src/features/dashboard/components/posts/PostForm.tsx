@@ -9,6 +9,11 @@ import { createClient } from "@/lib/supabase/client";
 import { Post, Category, Tag } from "@/lib/types";
 import EditorClient from "./EditorClient";
 import { uploadImage } from "@/lib/supabase/upload-image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { postSchema, type PostFormValues } from "@/lib/validation";
+import { env } from "@/lib/env";
+import { useCreatePost, useUpdatePost } from "../../hooks/usePostMutations";
 
 interface PostFormProps {
   post?: Post;
@@ -20,21 +25,44 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
   const [loading, setLoading] = useState(false);
   const supabase = React.useMemo(() => createClient(), []);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [formData, setFormData] = useState({
-    title: post?.title || "",
-    slug: post?.slug || "",
-    excerpt: post?.excerpt || "",
-    content: post?.content || "",
-    status: post?.status || "draft",
-    seo_title: post?.seo_title || "",
-    seo_description: post?.seo_description || "",
-    thumbnail: post?.thumbnail || "",
-  });
+
+  const createPostMutation = useCreatePost();
+  const updatePostMutation = useUpdatePost();
 
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+
+  // Initialize form with default values
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<PostFormValues>({
+    resolver: zodResolver(postSchema),
+    defaultValues: {
+      title: post?.title || "",
+      slug: post?.slug || "",
+      excerpt: post?.excerpt || "",
+      content: post?.content || "",
+      status: post?.status || "draft",
+      seo_title: post?.seo_title || "",
+      seo_description: post?.seo_description || "",
+      thumbnail: post?.thumbnail || "",
+      categories:
+        post?.categories?.map((c) => c.id) ||
+        (post?.category?.id ? [post.category.id] : []),
+      tags: post?.tags?.map((t) => t.id) || [],
+    },
+  });
+
+  // Watch fields for logic (e.g. slug generation, categories display)
+  const currentTitle = watch("title");
+  const currentThumbnail = watch("thumbnail");
+  const currentContent = watch("content");
+  const selectedCategories = watch("categories");
+  const selectedTags = watch("tags");
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -49,49 +77,33 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
 
     fetchCategories();
     fetchTags();
+  }, [supabase]);
 
-    if (post?.categories) {
-      setSelectedCategories(post.categories.map((c) => c.id));
-    } else if (post?.category) {
-      // Backward compatibility
-      setSelectedCategories([post.category.id]);
+  // Auto-generate slug from title if creating new post
+  React.useEffect(() => {
+    if (!isEditing && currentTitle) {
+      const slug = currentTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+      setValue("slug", slug, { shouldValidate: true });
     }
-
-    if (post?.tags) {
-      setSelectedTags(post.tags.map((t) => t.id));
-    }
-  }, [supabase, post]);
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      title,
-      slug: !isEditing ? generateSlug(title) : prev.slug,
-    }));
-  };
+  }, [currentTitle, isEditing, setValue]);
 
   const handleCategoryToggle = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId],
-    );
+    const current = selectedCategories || [];
+    const updated = current.includes(categoryId)
+      ? current.filter((id: string) => id !== categoryId)
+      : [...current, categoryId];
+    setValue("categories", updated, { shouldValidate: true });
   };
 
   const handleTagToggle = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId)
-        ? prev.filter((id) => id !== tagId)
-        : [...prev, tagId],
-    );
+    const current = selectedTags || [];
+    const updated = current.includes(tagId)
+      ? current.filter((id: string) => id !== tagId)
+      : [...current, tagId];
+    setValue("tags", updated, { shouldValidate: true });
   };
 
   const handleThumbnailChange = async (
@@ -103,7 +115,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
     try {
       const file = e.target.files[0];
       const url = await uploadImage(file, "images", supabase);
-      setFormData((prev) => ({ ...prev, thumbnail: url }));
+      setValue("thumbnail", url, { shouldValidate: true });
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert("Error uploading thumbnail: " + error.message);
@@ -116,24 +128,44 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
   };
 
   const removeThumbnail = () => {
-    setFormData((prev) => ({ ...prev, thumbnail: "" }));
+    setValue("thumbnail", "", { shouldValidate: true });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: PostFormValues) => {
     setLoading(true);
 
     try {
-      let postId = post?.id;
+      // Determine published_at
+      let published_at = post?.published_at;
+
+      if (data.status === "published") {
+        if (!published_at) {
+          published_at = new Date().toISOString();
+        }
+      } else {
+        published_at = null;
+      }
+
+      const postPayload = {
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        content: data.content,
+        status: data.status,
+        seo_title: data.seo_title,
+        seo_description: data.seo_description,
+        thumbnail: data.thumbnail,
+        published_at: published_at,
+      };
 
       if (isEditing && post) {
         // Update Post
-        const { error } = await supabase
-          .from("posts")
-          .update(formData)
-          .eq("id", post.id);
-
-        if (error) throw error;
+        await updatePostMutation.mutateAsync({
+          id: post.id,
+          post: postPayload,
+          categoryIds: data.categories,
+          tagIds: data.tags,
+        });
       } else {
         // Create Post
         const {
@@ -144,68 +176,18 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
           throw new Error("You must be logged in to create a post");
         }
 
-        const { data, error } = await supabase
-          .from("posts")
-          .insert([
-            {
-              ...formData,
-              author_id: user.id,
-            },
-          ])
-          .select()
-          .single();
-
-        if (error) throw error;
-        postId = data.id;
-      }
-
-      if (postId) {
-        // Manage Categories
-        if (isEditing) {
-          // Delete existing categories
-          const { error: deleteCatError } = await supabase
-            .from("post_categories")
-            .delete()
-            .eq("post_id", postId);
-          if (deleteCatError) throw deleteCatError;
-
-          // Delete existing tags
-          const { error: deleteTagError } = await supabase
-            .from("post_tags")
-            .delete()
-            .eq("post_id", postId);
-          if (deleteTagError) throw deleteTagError;
-        }
-
-        // Insert new categories
-        if (selectedCategories.length > 0) {
-          const postCategories = selectedCategories.map((catId) => ({
-            post_id: postId,
-            category_id: catId,
-          }));
-
-          const { error: insertCatError } = await supabase
-            .from("post_categories")
-            .insert(postCategories);
-          if (insertCatError) throw insertCatError;
-        }
-
-        // Insert new tags
-        if (selectedTags.length > 0) {
-          const postTags = selectedTags.map((tagId) => ({
-            post_id: postId,
-            tag_id: tagId,
-          }));
-
-          const { error: insertTagError } = await supabase
-            .from("post_tags")
-            .insert(postTags);
-          if (insertTagError) throw insertTagError;
-        }
+        await createPostMutation.mutateAsync({
+          post: {
+            ...postPayload,
+            author_id: user.id,
+          },
+          categoryIds: data.categories,
+          tagIds: data.tags,
+        });
       }
 
       router.push("/dashboard/posts");
-      router.refresh();
+      // router.refresh() is handled in mutations onSuccess
     } catch (error: unknown) {
       console.error("Error saving post:", error);
       if (error instanceof Error) {
@@ -219,7 +201,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
@@ -263,12 +245,19 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <input
                 type="text"
-                required
-                value={formData.title}
-                onChange={handleTitleChange}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
+                {...register("title")}
+                className={`w-full rounded-lg border bg-slate-50 px-4 py-2 transition-all outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 ${
+                  errors.title
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-slate-200 focus:border-blue-500 dark:border-slate-700"
+                }`}
                 placeholder="Enter post title"
               />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.title.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -276,11 +265,11 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                 Thumbnail
               </label>
               <div className="space-y-4">
-                {formData.thumbnail ? (
+                {currentThumbnail ? (
                   <div className="group relative aspect-video w-full overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
                     <div className="relative h-full w-full">
                       <Image
-                        src={formData.thumbnail}
+                        src={currentThumbnail}
                         alt="Thumbnail"
                         fill
                         className="object-cover"
@@ -329,13 +318,18 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <div className="min-h-[400px]">
                 <EditorClient
-                  apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-                  value={formData.content}
+                  apiKey={env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                  value={currentContent}
                   onChange={(content) =>
-                    setFormData((prev) => ({ ...prev, content }))
+                    setValue("content", content, { shouldValidate: true })
                   }
                 />
               </div>
+              {errors.content && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.content.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -349,16 +343,15 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <input
                 type="text"
-                value={formData.seo_title}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    seo_title: e.target.value,
-                  }))
-                }
+                {...register("seo_title")}
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
                 placeholder="Meta title"
               />
+              {errors.seo_title && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.seo_title.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -366,16 +359,15 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <textarea
                 rows={3}
-                value={formData.seo_description}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    seo_description: e.target.value,
-                  }))
-                }
+                {...register("seo_description")}
                 className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
                 placeholder="Meta description"
               />
+              {errors.seo_description && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.seo_description.message}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -390,13 +382,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                 Status
               </label>
               <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    status: e.target.value as "draft" | "published",
-                  }))
-                }
+                {...register("status")}
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
               >
                 <option value="draft">Draft</option>
@@ -407,7 +393,13 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Categories
               </label>
-              <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+              <div
+                className={`max-h-60 space-y-2 overflow-y-auto rounded-lg border bg-slate-50 p-3 dark:bg-slate-800 ${
+                  errors.categories
+                    ? "border-red-500"
+                    : "border-slate-200 dark:border-slate-700"
+                }`}
+              >
                 {categories.map((category) => (
                   <label
                     key={category.id}
@@ -415,7 +407,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedCategories.includes(category.id)}
+                      checked={selectedCategories?.includes(category.id)}
                       onChange={() => handleCategoryToggle(category.id)}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -430,6 +422,11 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                   </p>
                 )}
               </div>
+              {errors.categories && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.categories.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -443,7 +440,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedTags.includes(tag.id)}
+                      checked={selectedTags?.includes(tag.id)}
                       onChange={() => handleTagToggle(tag.id)}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -465,13 +462,18 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <input
                 type="text"
-                required
-                value={formData.slug}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                }
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
+                {...register("slug")}
+                className={`w-full rounded-lg border bg-slate-50 px-4 py-2 transition-all outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 ${
+                  errors.slug
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-slate-200 focus:border-blue-500 dark:border-slate-700"
+                }`}
               />
+              {errors.slug && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.slug.message}
+                </p>
+              )}
               <p className="mt-1 text-xs text-slate-500">
                 URL-friendly version of the title
               </p>
@@ -488,13 +490,19 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
               </label>
               <textarea
                 rows={4}
-                value={formData.excerpt}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
-                }
-                className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
+                {...register("excerpt")}
+                className={`w-full resize-none rounded-lg border bg-slate-50 px-4 py-2 transition-all outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800 ${
+                  errors.excerpt
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-slate-200 focus:border-blue-500 dark:border-slate-700"
+                }`}
                 placeholder="Brief summary for list view"
               />
+              {errors.excerpt && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.excerpt.message}
+                </p>
+              )}
             </div>
           </div>
         </div>

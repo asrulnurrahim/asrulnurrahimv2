@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPaginatedPosts } from "@/features/blog/services/posts";
 
+import { publicPostsSchema } from "@/lib/validation";
+
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 10;
-    const search = searchParams.get("search") || undefined;
-    const categorySlug = searchParams.get("category") || undefined;
-    const tagSlug = searchParams.get("tag") || undefined;
+    const searchParams = Object.fromEntries(request.nextUrl.searchParams);
+    const result = publicPostsSchema.safeParse(searchParams);
 
-    const result = await getPaginatedPosts(
-      page,
-      limit,
-      search,
-      categorySlug,
-      tagSlug,
-    );
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid parameters", details: result.error.format() },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json(result);
+    const { page, limit, search, category, tag } = result.data;
+
+    const posts = await getPaginatedPosts(page, limit, search, category, tag);
+
+    return NextResponse.json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
     return NextResponse.json(

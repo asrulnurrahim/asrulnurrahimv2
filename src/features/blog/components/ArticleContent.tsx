@@ -14,27 +14,22 @@ export default function ArticleContent({ content }: ArticleContentProps) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Find all pre elements
-    const preElements = containerRef.current.querySelectorAll("pre");
+    // Find all code block wrappers
+    const codeBlocks = containerRef.current.querySelectorAll(".code-block");
 
-    preElements.forEach((pre) => {
+    codeBlocks.forEach((block) => {
+      const placeholder = block.querySelector(".copy-btn-placeholder");
+      if (!placeholder) return;
+
       // Prevent double injection
-      if (pre.querySelector(".copy-btn-container")) return;
+      if (placeholder.hasChildNodes()) return;
 
-      // Ensure pre is relative for absolute positioning of button
-      // We enforce this via style to be safe, though CSS classes should handle it usually
-      pre.style.position = "relative";
+      // Find the code content for copying
+      const codeElement = block.querySelector("code");
+      const codeText = codeElement ? codeElement.innerText : "";
 
-      // Create container for React root
-      const buttonContainer = document.createElement("div");
-      buttonContainer.className = "copy-btn-container absolute top-3 right-3";
-      pre.appendChild(buttonContainer);
-      // Make pre a group so we can hover
-      pre.classList.add("group");
-
-      // We'll use a small React component for the button itself to handle state cleanly
-      const root = createRoot(buttonContainer);
-      root.render(<CopyButton text={pre.innerText} />);
+      const root = createRoot(placeholder);
+      root.render(<CopyButton text={codeText} />);
     });
   }, [content]);
 
@@ -59,21 +54,17 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className={`flex items-center gap-2 rounded-lg border p-2 backdrop-blur-md transition-all duration-200 ${
-        copied
-          ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-400"
-          : "border-gray-700/50 bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-white"
-      }`}
+      className="flex items-center gap-1.5 text-xs font-semibold text-gray-300 transition-colors hover:text-white"
       aria-label="Copy code"
     >
       {copied ? (
         <>
-          <Check className="h-4 w-4" />
-          <span>Copied</span>
+          <Check className="h-3.5 w-3.5" />
+          <span>Copied!</span>
         </>
       ) : (
         <>
-          <Copy className="h-4 w-4" />
+          <Copy className="h-3.5 w-3.5" />
           <span>Copy code</span>
         </>
       )}

@@ -25,6 +25,7 @@ import {
   ViewCounter,
 } from "../components";
 import { processContent } from "@/lib/toc";
+import { highlightContent } from "@/lib/highlight";
 import { calculateReadingTime, slugify } from "@/lib/utils";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -91,7 +92,8 @@ export default async function BlogDetail({ slug }: BlogDetailProps) {
     },
   };
 
-  const { content, toc } = processContent(post.content || "");
+  const { content: processedHtml, toc } = processContent(post.content || "");
+  const content = await highlightContent(processedHtml);
   const hasToc = toc.length >= 3;
 
   return (
@@ -398,14 +400,19 @@ export default async function BlogDetail({ slug }: BlogDetailProps) {
                           {relatedPost.title}
                         </h4>
                         <time className="block text-xs text-gray-500 dark:text-gray-400">
-                          {format(
-                            new Date(
+                          {(() => {
+                            const dateStr =
                               relatedPost.published_at ||
-                                relatedPost.created_at,
-                            ),
-                            "d MMMM yyyy",
-                            { locale: id },
-                          )}
+                              relatedPost.created_at ||
+                              new Date().toISOString();
+                            try {
+                              return format(new Date(dateStr), "d MMMM yyyy", {
+                                locale: id,
+                              });
+                            } catch {
+                              return "Invalid Date";
+                            }
+                          })()}
                         </time>
                       </div>
                     </Link>

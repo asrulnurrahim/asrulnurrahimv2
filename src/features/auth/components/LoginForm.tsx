@@ -7,15 +7,29 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormValues } from "@/lib/validation";
+
 export function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const handleLogin = async (provider: "github" | "google") => {
     try {
@@ -38,14 +52,13 @@ export function LoginForm() {
     }
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormValues) => {
     try {
       setLoading(true);
       setError(null);
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
       if (error) throw error;
       router.push("/dashboard");
@@ -77,7 +90,7 @@ export function LoginForm() {
                   </div>
                 </Link>
                 <div className="my-4 grid gap-2">
-                  <button
+                  {/* <button
                     type="button"
                     className="btn hover:border-primary-500 dark:hover:border-primary-500 mt-2 flex w-full items-center justify-center gap-2 rounded border border-[#e7eaee] bg-[#f8f9fa] px-4 py-2.5 text-[#131920] transition-colors dark:border-[#303f50] dark:bg-[#131920] dark:text-[#bfbfbf]"
                   >
@@ -100,7 +113,7 @@ export function LoginForm() {
                       height={16}
                     />{" "}
                     <span> Sign In with Twitter</span>
-                  </button>
+                  </button> */}
                   <button
                     type="button"
                     onClick={() => handleLogin("google")}
@@ -157,28 +170,42 @@ export function LoginForm() {
                 </div>
               )}
 
-              <form onSubmit={handleEmailLogin}>
+              <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="mb-3">
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="form-control m-0 block w-full rounded border border-slate-300 bg-white bg-clip-padding px-3 py-2 text-base font-normal text-slate-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-slate-700 focus:outline-none dark:border-[#303f50] dark:bg-[#263240] dark:text-slate-200"
+                    {...register("email")}
+                    className={`form-control m-0 block w-full rounded border bg-white bg-clip-padding px-3 py-2 text-base font-normal text-slate-700 transition ease-in-out focus:bg-white focus:text-slate-700 focus:outline-none dark:bg-[#263240] dark:text-slate-200 ${
+                      errors.email
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-slate-300 focus:border-blue-600 dark:border-[#303f50]"
+                    }`}
                     id="floatingInput"
                     placeholder="Email Address"
-                    required
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div className="mb-4">
                   <input
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="form-control m-0 block w-full rounded border border-slate-300 bg-white bg-clip-padding px-3 py-2 text-base font-normal text-slate-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-slate-700 focus:outline-none dark:border-[#303f50] dark:bg-[#263240] dark:text-slate-200"
+                    {...register("password")}
+                    className={`form-control m-0 block w-full rounded border bg-white bg-clip-padding px-3 py-2 text-base font-normal text-slate-700 transition ease-in-out focus:bg-white focus:text-slate-700 focus:outline-none dark:bg-[#263240] dark:text-slate-200 ${
+                      errors.password
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-slate-300 focus:border-blue-600 dark:border-[#303f50]"
+                    }`}
                     id="floatingInput1"
                     placeholder="Password"
-                    required
                   />
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
@@ -204,7 +231,7 @@ export function LoginForm() {
                 <div className="mt-4">
                   <button
                     type="submit"
-                    className="btn btn-primary w-full rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+                    className="btn btn-primary w-full rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
                     disabled={loading}
                   >
                     {loading ? "Signing in..." : "Login"}

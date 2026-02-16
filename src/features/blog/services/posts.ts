@@ -356,13 +356,10 @@ export const getDashboardPosts = async (
     count,
   } = await dbQuery.range(offset, offset + limit - 1);
 
-  if (error) {
-    console.error("Error fetching posts:", error);
-    return { data: [], meta: { total: 0, page, last_page: 0 } };
-  }
+  if (error) throw new Error(`Supabase error: ${error.message}`);
 
   // Transform
-  const transformedData = (posts || []).map((post) => {
+  const transformedData = (posts || []).map((post: unknown) => {
     const p = post as unknown as SupabasePostRow;
     return {
       ...p,
@@ -414,6 +411,7 @@ export const getPost = async (id: string) => {
 export const createPost = async (
   post: Partial<Post>,
   categoryIds?: string[],
+  tagIds?: string[],
 ) => {
   const supabase = await createClient();
   // Remove fields that are not columns in 'posts' table
@@ -440,6 +438,19 @@ export const createPost = async (
     if (catError) throw catError;
   }
 
+  if (tagIds && tagIds.length > 0) {
+    const postTags = tagIds.map((tagId) => ({
+      post_id: data.id,
+      tag_id: tagId,
+    }));
+
+    const { error: tagError } = await supabase
+      .from("post_tags")
+      .insert(postTags);
+
+    if (tagError) throw tagError;
+  }
+
   return data;
 };
 
@@ -447,6 +458,7 @@ export const updatePost = async (
   id: string,
   post: Partial<Post>,
   categoryIds?: string[],
+  tagIds?: string[],
 ) => {
   const supabase = await createClient();
   const { ...postData } = post;
@@ -461,14 +473,14 @@ export const updatePost = async (
   if (error) throw error;
 
   if (categoryIds !== undefined) {
-    // Delete existing
+    // Delete existing categories
     const { error: deleteError } = await supabase
       .from("post_categories")
       .delete()
       .eq("post_id", id);
     if (deleteError) throw deleteError;
 
-    // Insert new
+    // Insert new categories
     if (categoryIds.length > 0) {
       const postCategories = categoryIds.map((catId) => ({
         post_id: id,
@@ -478,6 +490,28 @@ export const updatePost = async (
       const { error: insertError } = await supabase
         .from("post_categories")
         .insert(postCategories);
+      if (insertError) throw insertError;
+    }
+  }
+
+  if (tagIds !== undefined) {
+    // Delete existing tags
+    const { error: deleteError } = await supabase
+      .from("post_tags")
+      .delete()
+      .eq("post_id", id);
+    if (deleteError) throw deleteError;
+
+    // Insert new tags
+    if (tagIds.length > 0) {
+      const postTags = tagIds.map((tagId) => ({
+        post_id: id,
+        tag_id: tagId,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("post_tags")
+        .insert(postTags);
       if (insertError) throw insertError;
     }
   }

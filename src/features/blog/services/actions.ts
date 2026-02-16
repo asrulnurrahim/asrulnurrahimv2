@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { Post } from "../types";
 
 export async function incrementView(slug: string) {
   const supabase = await createClient();
@@ -16,8 +17,7 @@ export async function incrementView(slug: string) {
 
 // --- Tag Actions ---
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createTag(prevState: any, formData: FormData) {
+export async function createTag(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
   const name = formData.get("name") as string;
   let slug = formData.get("slug") as string;
@@ -41,8 +41,7 @@ export async function createTag(prevState: any, formData: FormData) {
   return { message: "Success" };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateTag(prevState: any, formData: FormData) {
+export async function updateTag(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
@@ -80,4 +79,40 @@ export async function deleteTag(id: string) {
 
   revalidatePath("/dashboard/tags");
   return { message: "Success" };
+}
+
+export async function createPostAction(
+  post: Partial<Post>,
+  categoryIds?: string[],
+  tagIds?: string[],
+) {
+  const { createPost } = await import("./posts");
+  try {
+    const newPost = await createPost(post, categoryIds, tagIds);
+    revalidatePath("/dashboard/posts");
+    revalidatePath("/blog");
+    return { data: newPost, error: null };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { data: null, error: message };
+  }
+}
+
+export async function updatePostAction(
+  id: string,
+  post: Partial<Post>,
+  categoryIds?: string[],
+  tagIds?: string[],
+) {
+  const { updatePost } = await import("./posts");
+  try {
+    const updatedPost = await updatePost(id, post, categoryIds, tagIds);
+    revalidatePath("/dashboard/posts");
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${updatedPost.slug}`);
+    return { data: updatedPost, error: null };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { data: null, error: message };
+  }
 }

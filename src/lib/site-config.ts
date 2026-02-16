@@ -1,5 +1,7 @@
+import { env } from "@/lib/env";
+
 export const siteConfig = {
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://asrul.tech",
+  url: env.NEXT_PUBLIC_SITE_URL,
   title: "Asrul Tech - Front-End Engineer & UI Architect",
   siteName: "Asrul Tech",
   description:
