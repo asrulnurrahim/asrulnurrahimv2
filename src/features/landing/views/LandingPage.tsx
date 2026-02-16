@@ -10,7 +10,7 @@ export async function LandingPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Asrul Nur Rahim",
+    name: "Asrul Tech",
     url: siteConfig.url,
     potentialAction: {
       "@type": "SearchAction",

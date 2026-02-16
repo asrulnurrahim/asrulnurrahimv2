@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Github,
   Youtube,
@@ -40,9 +41,13 @@ export function Footer() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
             <div className="md:col-span-4">
-              <h2 className="mb-2 animate-[move-bg_20s_linear_infinite] bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] bg-clip-text text-2xl font-bold text-transparent">
-                Asrul Nur Rahim
-              </h2>
+              <Image
+                src="/logo-blue.png"
+                alt="Asrul Tech"
+                width={150}
+                height={50}
+                className="mb-4 h-12 w-auto object-contain"
+              />
               <p className="mb-5 text-slate-500 dark:text-slate-400">
                 Experienced in building clean, precise, and visually consistent
                 web interfaces. Focused on performance, SEO best practices,

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserMenu } from "@/components/shell/UserMenu";
@@ -26,13 +27,17 @@ export function Navbar() {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <span className="animate-[move-bg_20s_linear_infinite] bg-linear-to-r from-[rgb(50,66,74)] via-[rgb(69,134,255)] to-[rgb(1,236,213)] bg-size-[300%_100%] bg-clip-text text-xl font-bold text-transparent">
-                Asrul Nur Rahim
-              </span>
+              <Image
+                src="/logo.png"
+                alt="Asrul Tech"
+                width={120}
+                height={40}
+                className="h-12 w-auto object-contain"
+              />
             </Link>
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
+            {/* <span className="mt-2 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-500">
               v1.0.0
-            </span>
+            </span> */}
           </div>
 
           {/* Desktop Menu */}

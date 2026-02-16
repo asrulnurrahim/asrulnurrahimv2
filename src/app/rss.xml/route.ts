@@ -8,7 +8,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Asrul Nur Rahim Blog</title>
+    <title>Asrul Tech</title>
     <link>${baseUrl}</link>
     <description>Sharing knowledge about technology, coding, and software engineering.</description>
     <language>id-ID</language>
@@ -25,7 +25,7 @@ export async function GET() {
           post.published_at || post.created_at,
         ).toUTCString()}</pubDate>
         <description><![CDATA[${post.excerpt || ""}]]></description>
-        <author>me@asrulnurrahim.com (Asrul Nur Rahim)</author>
+        <author>me@asrul.tech (Asrul Nur Rahim)</author>
         ${
           post.categories && post.categories.length > 0
             ? post.categories

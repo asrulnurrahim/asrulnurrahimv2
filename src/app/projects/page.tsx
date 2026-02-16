@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Showcase of my recent projects, applications, and experiments.",
   keywords: ["Projects", "Portfolio", "Case Studies", ...siteConfig.keywords],
   openGraph: {
-    title: "Projects | Asrul Nur Rahim",
+    title: "Projects | Asrul Tech",
     description:
       "Showcase of my recent projects, applications, and experiments.",
     url: `${siteConfig.url}/projects`,

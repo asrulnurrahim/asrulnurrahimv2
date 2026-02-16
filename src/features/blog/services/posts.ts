@@ -330,6 +330,11 @@ export const getDashboardPosts = async (
     dbQuery = dbQuery.ilike("title", `%${query}%`);
   }
 
+  // Status Filter
+  if (options.status && options.status !== "all") {
+    dbQuery = dbQuery.eq("status", options.status);
+  }
+
   // Sort
   if (sort === "author") {
     dbQuery = dbQuery.order("full_name", {
@@ -501,7 +506,13 @@ export const getRelatedPosts = async (
     .select("post_id")
     .in("category_id", categoryIds);
 
-  if (candidateError) throw new Error(candidateError.message);
+  if (candidateError) {
+    console.error(
+      "Error fetching related posts candidates:",
+      JSON.stringify(candidateError, null, 2),
+    );
+    return [];
+  }
 
   const candidateIds = new Set(
     candidates.map((c) => c.post_id).filter((id) => id !== currentPostId),
@@ -520,7 +531,13 @@ export const getRelatedPosts = async (
     .order("published_at", { ascending: false })
     .limit(limit);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error(
+      "Error fetching related posts:",
+      JSON.stringify(error, null, 2),
+    );
+    return [];
+  }
 
   // Transform
   return (posts || []).map((post) => {

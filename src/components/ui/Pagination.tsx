@@ -6,6 +6,7 @@ interface PaginationProps {
   totalPages: number;
   baseUrl: string;
   searchParams?: Record<string, string | number | undefined>;
+  onPrefetch?: (page: number) => void;
 }
 
 export default function Pagination({
@@ -13,13 +14,14 @@ export default function Pagination({
   totalPages,
   baseUrl,
   searchParams = {},
+  onPrefetch,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const createPageUrl = (page: number) => {
     const params = new URLSearchParams();
     Object.entries(searchParams).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && value !== null && value !== "") {
         params.set(key, value.toString());
       }
     });
@@ -37,6 +39,7 @@ export default function Pagination({
           href={createPageUrl(currentPage - 1)}
           className="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
           rel="prev"
+          onMouseEnter={() => onPrefetch?.(currentPage - 1)}
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
           Previous
@@ -57,6 +60,7 @@ export default function Pagination({
           href={createPageUrl(currentPage + 1)}
           className="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
           rel="next"
+          onMouseEnter={() => onPrefetch?.(currentPage + 1)}
         >
           Next
           <ChevronRight className="ml-2 h-4 w-4" />

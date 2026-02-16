@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Post } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useDebounce } from "use-debounce";
 
 interface PostsTableProps {
@@ -27,35 +27,60 @@ interface PostsTableProps {
     page: number;
     last_page: number;
   };
+  isLoading?: boolean;
   onDelete?: (id: string) => void;
+  onPageChange?: (page: number) => void;
+  onSearch?: (query: string) => void;
+  onSort?: (field: string) => void;
+  currentOptions?: {
+    sort?: string;
+    order?: "asc" | "desc";
+    query?: string;
+  };
 }
 
-export function PostsTable({ posts, meta }: PostsTableProps) {
+export function PostsTable({
+  posts,
+  meta,
+  isLoading,
+  onPageChange,
+  onSearch,
+  onSort,
+  onDelete,
+  currentOptions,
+}: PostsTableProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   // Search State
-  const [text, setText] = useState(searchParams.get("q") || "");
+  const [text, setText] = useState(currentOptions?.query || "");
   const [query] = useDebounce(text, 500);
 
-  // Update URL on search
-  useEffect(() => {
-    const currentQuery = searchParams.get("q") || "";
-    if (query === currentQuery) return;
+  // Sync internal search text with props if they change externally (e.g. navigation)
+  const [prevQuery, setPrevQuery] = useState(currentOptions?.query);
+  if (currentOptions?.query !== prevQuery) {
+    setPrevQuery(currentOptions?.query);
+    setText(currentOptions?.query || "");
+  }
 
-    const params = new URLSearchParams(searchParams);
-    if (query) {
-      params.set("q", query);
+  // Handle Search
+  useEffect(() => {
+    if (onSearch) {
+      onSearch(query);
     } else {
-      params.delete("q");
+      // Fallback for non-React Query usage (if any)
+      // ... existing router push logic could go here but we are refactoring fully
     }
-    params.set("page", "1"); // Reset to page 1 on search
-    router.push(`?${params.toString()}`);
-  }, [query, router, searchParams]);
+  }, [query, onSearch]);
 
   // Delete Handler
   const handleDelete = async (id: string) => {
+    if (onDelete) {
+      onDelete(id);
+      return;
+    }
+
+    // Fallback (Legacy)
     if (confirm("Are you sure you want to delete this post?")) {
       const { error } = await supabase.from("posts").delete().eq("id", id);
       if (error) {
@@ -67,34 +92,24 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
   };
 
   // Sort Handler
-  const handleSort = (field: string) => {
-    const params = new URLSearchParams(searchParams);
-    const currentSort = params.get("sort");
-    const currentOrder = params.get("order");
-
-    if (currentSort === field) {
-      // Toggle order
-      params.set("order", currentOrder === "asc" ? "desc" : "asc");
-    } else {
-      // New Sort
-      params.set("sort", field);
-      params.set("order", "asc");
+  const handleSortClick = (field: string) => {
+    if (onSort) {
+      onSort(field);
     }
-    router.push(`?${params.toString()}`);
   };
 
   // Pagination Handler
-  const handlePageChange = (newPage: number) => {
+  const handlePageChangeClick = (newPage: number) => {
     if (newPage < 1 || newPage > meta.last_page) return;
-    const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
-    router.push(`?${params.toString()}`);
+    if (onPageChange) {
+      onPageChange(newPage);
+    }
   };
 
   // Render Sort Icon
   const renderSortIcon = (field: string) => {
-    const sort = searchParams.get("sort") || "created_at";
-    const order = searchParams.get("order") || "desc";
+    const sort = currentOptions?.sort || "created_at";
+    const order = currentOptions?.order || "desc";
 
     if (sort !== field)
       return <ChevronsUpDown size={14} className="text-slate-400" />;
@@ -103,7 +118,13 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
   };
 
   return (
-    <>
+    <div
+      className={
+        isLoading
+          ? "pointer-events-none opacity-50 transition-opacity"
+          : "transition-opacity"
+      }
+    >
       <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
           Blog Posts
@@ -140,7 +161,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
               <tr className="border-b border-slate-200 dark:border-slate-700">
                 <th
                   className="group cursor-pointer px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase transition-colors select-none hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-                  onClick={() => handleSort("title")}
+                  onClick={() => handleSortClick("title")}
                 >
                   <div className="flex items-center gap-1">
                     Title {renderSortIcon("title")}
@@ -148,7 +169,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
                 </th>
                 <th
                   className="group cursor-pointer px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase transition-colors select-none hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-                  onClick={() => handleSort("category")}
+                  onClick={() => handleSortClick("category")}
                 >
                   <div className="flex items-center gap-1">
                     Category {renderSortIcon("category")}
@@ -156,7 +177,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
                 </th>
                 <th
                   className="group cursor-pointer px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase transition-colors select-none hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-                  onClick={() => handleSort("status")}
+                  onClick={() => handleSortClick("status")}
                 >
                   <div className="flex items-center gap-1">
                     Status {renderSortIcon("status")}
@@ -164,7 +185,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
                 </th>
                 <th
                   className="group cursor-pointer px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase transition-colors select-none hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-                  onClick={() => handleSort("author")}
+                  onClick={() => handleSortClick("author")}
                 >
                   <div className="flex items-center gap-1">
                     Author {renderSortIcon("author")}
@@ -172,7 +193,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
                 </th>
                 <th
                   className="group cursor-pointer px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase transition-colors select-none hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
-                  onClick={() => handleSort("created_at")}
+                  onClick={() => handleSortClick("created_at")}
                 >
                   <div className="flex items-center gap-1">
                     Created At {renderSortIcon("created_at")}
@@ -310,7 +331,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handlePageChange(meta.page - 1)}
+              onClick={() => handlePageChangeClick(meta.page - 1)}
               disabled={meta.page <= 1}
               className="rounded-lg border border-slate-200 p-2 text-slate-600 transition-colors hover:bg-slate-50 enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
             >
@@ -320,7 +341,7 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
               Page {meta.page} of {meta.last_page}
             </span>
             <button
-              onClick={() => handlePageChange(meta.page + 1)}
+              onClick={() => handlePageChangeClick(meta.page + 1)}
               disabled={meta.page >= meta.last_page}
               className="rounded-lg border border-slate-200 p-2 text-slate-600 transition-colors hover:bg-slate-50 enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
             >
@@ -329,6 +350,6 @@ export function PostsTable({ posts, meta }: PostsTableProps) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

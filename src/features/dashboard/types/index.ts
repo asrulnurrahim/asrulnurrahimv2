@@ -1,7 +1,23 @@
+// import { Post } from "@/features/blog/types";
+
+export interface DashboardRecentPost {
+  id: string;
+  title: string;
+  slug: string;
+  status: "draft" | "published";
+  views: number;
+  published_at: string | null;
+  categories: { name: string; color?: string }[];
+}
+
 export interface DashboardStats {
-  totalPosts: number;
-  totalViews: number;
-  totalProjects: number;
+  counts: {
+    posts: number;
+    projects: number;
+    categories: number;
+    views: number;
+  };
+  recentPosts: DashboardRecentPost[];
 }
 
 export interface PostFormValues {

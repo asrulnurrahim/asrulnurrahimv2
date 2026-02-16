@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${profile.full_name} - Author`,
     description: profile.bio || `Articles written by ${profile.full_name}`,
     openGraph: {
-      title: `${profile.full_name} - Author at Asrul Nur Rahim Blog`,
+      title: `${profile.full_name} - Author at Asrul Tech`,
       description: profile.bio || `Articles written by ${profile.full_name}`,
       images: profile.avatar_url ? [profile.avatar_url] : [],
     },

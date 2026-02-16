@@ -10,7 +10,7 @@ export default async function ProjectList() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Projects | Asrul Nur Rahim",
+    name: "Projects | Asrul Tech",
     description:
       "Showcase of my recent projects, applications, and experiments.",
     url: `${siteConfig.url}/projects`,

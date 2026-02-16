@@ -1,56 +1,69 @@
 "use client";
 
-import { useState, useRef } from "react";
-import {
-  createTag,
-  deleteTag,
-  updateTag,
-} from "@/features/blog/services/actions";
+import { useState } from "react";
+import { useTags } from "../../hooks/useTags";
 import { Tag } from "@/lib/types";
 import { Trash2, Edit2, Check, X, Loader2, Tag as TagIcon } from "lucide-react";
 
-export default function TagManager({ tags }: { tags: Tag[] }) {
-  const [loadingId, setLoadingId] = useState<string | null>(null);
+export default function TagManager({}: { tags?: Tag[] }) {
+  // Use React Query hook
+  const {
+    tags,
+    isLoading,
+    createTag,
+    updateTag,
+    deleteTag,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useTags();
+
+  // Local state for UI
+  const [loadingId, setLoadingId] = useState<string | null>(null); // For delete/update loading indicators specific to an item
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editSlug, setEditSlug] = useState("");
+
+  // Creation state
   const [newSlug, setNewSlug] = useState("");
   const [newName, setNewName] = useState("");
-  const formRef = useRef<HTMLFormElement>(null);
-  const [isCreating, setIsCreating] = useState(false);
-
-  const handleCreate = async (formData: FormData) => {
-    setIsCreating(true);
-    try {
-      const res = await createTag(null, formData);
-      if (res.message !== "Success") {
-        alert(res.message);
-      } else {
-        formRef.current?.reset();
-        setNewName("");
-        setNewSlug("");
-      }
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this tag?")) return;
-    setLoadingId(id);
-    try {
-      const res = await deleteTag(id);
-      if (res.message !== "Success") alert(res.message);
-    } finally {
-      setLoadingId(null);
-    }
-  };
 
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
+  };
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName) return;
+
+    createTag(
+      { name: newName, slug: newSlug || generateSlug(newName) },
+      {
+        onSuccess: () => {
+          setNewName("");
+          setNewSlug("");
+        },
+        onError: (error) => {
+          alert(`Error: ${error.message}`);
+        },
+      },
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    if (!confirm("Are you sure you want to delete this tag?")) return;
+    setLoadingId(id);
+
+    deleteTag(id, {
+      onSuccess: () => setLoadingId(null),
+      onError: (error) => {
+        setLoadingId(null);
+        alert(`Error: ${error.message}`);
+      },
+    });
   };
 
   const startEdit = (tag: Tag) => {
@@ -65,24 +78,27 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
     setEditSlug("");
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = () => {
     if (!editingId) return;
     setLoadingId(editingId);
-    try {
-      const formData = new FormData();
-      formData.append("id", editingId);
-      formData.append("name", editName);
-      formData.append("slug", editSlug);
 
-      const res = await updateTag(null, formData);
-      if (res.message !== "Success") {
-        alert(res.message);
-      } else {
-        setEditingId(null);
-      }
-    } finally {
-      setLoadingId(null);
-    }
+    updateTag(
+      {
+        id: editingId,
+        name: editName,
+        slug: editSlug || generateSlug(editName),
+      },
+      {
+        onSuccess: () => {
+          setEditingId(null);
+          setLoadingId(null);
+        },
+        onError: (error) => {
+          setLoadingId(null);
+          alert(`Error: ${error.message}`);
+        },
+      },
+    );
   };
 
   return (
@@ -94,8 +110,7 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
           Add New Tag
         </h3>
         <form
-          ref={formRef}
-          action={handleCreate}
+          onSubmit={handleCreate}
           className="flex w-full flex-col gap-4 md:flex-row"
         >
           <div className="flex-1 space-y-2">
@@ -145,13 +160,18 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
           </h3>
         </div>
 
-        {tags.length === 0 ? (
+        {isLoading ? (
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
+            <p className="mt-2">Loading tags...</p>
+          </div>
+        ) : tags.length === 0 ? (
           <div className="p-8 text-center text-slate-500 dark:text-slate-400">
             No tags found. Create one above!
           </div>
         ) : (
           <div className="divide-y divide-slate-200 dark:divide-slate-800">
-            {tags.map((tag) => (
+            {tags.map((tag: Tag) => (
               <div
                 key={tag.id}
                 className="flex items-center justify-between p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
@@ -184,7 +204,7 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleUpdate}
-                          disabled={loadingId === tag.id}
+                          disabled={loadingId === tag.id || isUpdating}
                           className="rounded-md bg-green-100 p-1.5 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
                         >
                           {loadingId === tag.id ? (
@@ -226,7 +246,7 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
                       </button>
                       <button
                         onClick={() => handleDelete(tag.id)}
-                        disabled={loadingId === tag.id}
+                        disabled={loadingId === tag.id || isDeleting}
                         className="p-2 text-slate-400 transition-colors hover:text-red-600 dark:hover:text-red-400"
                         title="Delete"
                       >

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import ClientLayout from "@/components/shell/ClientLayout";
-import { ThemeProvider } from "@/app/providers/theme-provider";
+import { Providers } from "@/app/providers";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.title,
-    template: `%s | ${siteConfig.author}`,
+    template: `%s | ${siteConfig.siteName}`,
   },
   description: siteConfig.description,
   keywords: siteConfig.keywords,
@@ -100,9 +100,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${theme} ${jakarta.variable}`}>
       <body className="font-default text-text-default antialiased">
-        <ThemeProvider defaultTheme={theme}>
+        <Providers defaultTheme={theme}>
           <ClientLayout>{children}</ClientLayout>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

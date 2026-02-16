@@ -2,6 +2,7 @@ export interface Project {
   id: string;
   title: string;
   slug: string;
+  thumbnail?: string;
   thumbnail_url: string | null;
   summary: string | null;
   problem: string | null;

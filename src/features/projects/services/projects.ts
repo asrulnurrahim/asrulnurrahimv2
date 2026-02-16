@@ -34,7 +34,9 @@ export const getProjectBySlug = async (slug: string) => {
   const supabase = createStaticClient();
   const { data: project, error } = await supabase
     .from("projects")
-    .select("*")
+    .select(
+      "id, title, slug, summary, content, thumbnail, demo_url, repo_url, tech_stack, created_at, updated_at",
+    )
     .eq("slug", slug)
     .eq("status", "published")
     .is("deleted_at", null)

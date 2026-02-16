@@ -46,4 +46,5 @@ export interface DashboardPostsOptions {
   query?: string;
   sort?: string;
   order?: "asc" | "desc";
+  status?: "draft" | "published" | "all";
 }

@@ -1,6 +1,7 @@
 export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://asrul.tech",
-  title: "Asrul Nur Rahim - Front-End Engineer & UI Architect",
+  title: "Asrul Tech - Front-End Engineer & UI Architect",
+  siteName: "Asrul Tech",
   description:
     "Personal website of Asrul Nur Rahim. Specializing in pixel-perfect UI, performance optimization, and scalable front-end architecture.",
   author: "Asrul Nur Rahim",
