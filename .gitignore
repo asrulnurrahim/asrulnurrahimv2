@@ -44,10 +44,12 @@ Thumbs.db
 *.log
 
 # Environment Safety
-.env
+.env*
 
 # Supabase
 supabase/.branches
 supabase/.temp
+
+.git
 
 
