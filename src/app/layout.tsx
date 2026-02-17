@@ -15,7 +15,7 @@ const jakarta = Plus_Jakarta_Sans({
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  metadataBase: siteConfig.url ? new URL(siteConfig.url) : undefined,
+  metadataBase: new URL(siteConfig.url || "http://localhost:3000"),
   title: {
     default: siteConfig.title,
     template: `%s | ${siteConfig.siteName}`,

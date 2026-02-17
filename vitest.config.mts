@@ -5,9 +5,8 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: "happy-dom",
+    environment: "node",
     globals: true,
-    setupFiles: [],
     include: ["**/*.test.{ts,tsx}"],
     alias: {
       "@": path.resolve(__dirname, "./src"),

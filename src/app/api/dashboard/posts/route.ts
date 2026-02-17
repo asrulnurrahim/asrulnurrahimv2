@@ -1,3 +1,4 @@
+import "server-only";
 import { NextResponse } from "next/server";
 import { getDashboardPosts } from "@/features/blog/services";
 import { NextRequest } from "next/server";

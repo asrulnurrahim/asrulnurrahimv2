@@ -16,23 +16,23 @@ describe("envSchema", () => {
   });
 
   it("validates valid environment variables", async () => {
-    const { envSchema } = await import("./env");
+    const { clientEnvSchema } = await import("./env/client");
     const validEnv = {
       NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "public-anon-key",
       NEXT_PUBLIC_SITE_URL: "https://example.com",
       NEXT_PUBLIC_TINYMCE_API_KEY: "tinymce-key",
     };
-    const result = envSchema.safeParse(validEnv);
+    const result = clientEnvSchema.safeParse(validEnv);
     expect(result.success).toBe(true);
   });
 
   it("validates required fields", async () => {
-    const { envSchema } = await import("./env");
+    const { clientEnvSchema } = await import("./env/client");
     const invalidEnv = {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "public-anon-key",
     };
-    const result = envSchema.safeParse(invalidEnv);
+    const result = clientEnvSchema.safeParse(invalidEnv);
     expect(result.success).toBe(false);
     if (!result.success) {
       const issues = result.error.issues;
@@ -43,22 +43,22 @@ describe("envSchema", () => {
   });
 
   it("validates url format", async () => {
-    const { envSchema } = await import("./env");
+    const { clientEnvSchema } = await import("./env/client");
     const invalidEnv = {
       NEXT_PUBLIC_SUPABASE_URL: "not-a-url",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "public-anon-key",
     };
-    const result = envSchema.safeParse(invalidEnv);
+    const result = clientEnvSchema.safeParse(invalidEnv);
     expect(result.success).toBe(false);
   });
 
   it("allows undefined site url", async () => {
-    const { envSchema } = await import("./env");
+    const { clientEnvSchema } = await import("./env/client");
     const validEnv = {
       NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "public-anon-key",
     };
-    const result = envSchema.safeParse(validEnv);
+    const result = clientEnvSchema.safeParse(validEnv);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.NEXT_PUBLIC_SITE_URL).toBeUndefined();
@@ -74,7 +74,7 @@ describe("envSchema", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
 
     // Re-import to trigger execution of the parsing logic
-    const { env } = await import("./env");
+    const { env } = await import("./env/client");
     expect(env.NEXT_PUBLIC_SITE_URL).toBe("https://my-deployment.vercel.app");
   });
 });

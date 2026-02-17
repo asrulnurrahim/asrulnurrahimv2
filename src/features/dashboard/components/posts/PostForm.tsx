@@ -12,7 +12,7 @@ import { uploadImage } from "@/lib/supabase/upload-image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postSchema, type PostFormValues } from "@/lib/validation";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env/client";
 import { useCreatePost, useUpdatePost } from "../../hooks/usePostMutations";
 
 interface PostFormProps {

@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env } from "@/lib/env/client";
 
 export const siteConfig = {
   url: env.NEXT_PUBLIC_SITE_URL,

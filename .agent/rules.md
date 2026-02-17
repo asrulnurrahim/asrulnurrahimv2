@@ -61,4 +61,13 @@ These rules are strict project contracts to ensure `dashboard` pages never trigg
 2.  **NO Supabase Imports**: Do not import Supabase in `loading.tsx`.
 3.  **NO Logic**: Strictly visual skeletons only.
 
-> **Result**: If these rules are maintained, the dashboard is guaranteed to be loop-free.
+### 5. Middleware Entry Point (`proxy.ts`)
+
+In this specific Next.js 16 (Turbopack) environment configuration, the middleware entry point is **natively recognized via `proxy.ts`**, NOT `middleware.ts`.
+
+**Why?**
+
+- **Conflict Avoidance**: Adding `src/middleware.ts` causes a build error (`Error: Both middleware file... and proxy file... are detected`).
+- **Project Convention**: `src/proxy.ts` is the single source of truth for edge middleware logic.
+
+> **Constraint**: DO NOT create `src/middleware.ts`. Always place middleware logic in `src/proxy.ts`. This file IS the active middleware.
