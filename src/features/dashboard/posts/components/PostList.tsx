@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { PostsTable } from "../components/posts/PostsTable";
+import { PostsTable } from "./posts/PostsTable";
 import { useDashboardPosts, useDeletePost } from "../hooks/useDashboardPosts";
 import { Post, DashboardPostsOptions } from "@/features/blog/types";
 

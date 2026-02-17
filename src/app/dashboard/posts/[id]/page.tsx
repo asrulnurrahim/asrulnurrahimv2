@@ -1,4 +1,4 @@
-import { PostEditor } from "@/features/dashboard/views";
+import { PostEditor } from "@/features/dashboard/posts/components/PostEditor";
 
 export default async function EditPostPage({
   params,

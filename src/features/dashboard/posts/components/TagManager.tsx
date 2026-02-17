@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import TagManagerComponent from "../components/tags/TagManager";
+import TagManagerComponent from "./tags/TagManager";
 import { Tag } from "@/lib/types";
 
 interface TagManagerProps {

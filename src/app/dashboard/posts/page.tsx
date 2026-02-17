@@ -1,5 +1,5 @@
 import React from "react";
-import { PostList } from "@/features/dashboard/views";
+import { PostList } from "@/features/dashboard/posts/components/PostList";
 import { getDashboardPosts } from "@/features/blog/services";
 
 export default async function PostsPage({

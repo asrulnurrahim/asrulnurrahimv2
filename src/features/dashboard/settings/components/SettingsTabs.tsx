@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { User as UserIcon, Lock } from "lucide-react";
-import ProfileForm from "./ProfileForm";
-import SecurityForm from "./SecurityForm";
+import ProfileForm from "../forms/ProfileForm";
+import SecurityForm from "../forms/SecurityForm";
 import AvatarUploadWrapper from "./AvatarUploadWrapper";
 
 interface SettingsTabsProps {

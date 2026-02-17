@@ -1,4 +1,7 @@
-import { getProjectBySlug, getProjects } from "@/features/projects/services";
+import {
+  getProjectBySlug,
+  getPublishedProjects,
+} from "@/features/projects/services";
 import { ProjectDetail } from "@/features/projects/views";
 import { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
@@ -10,7 +13,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const projects = await getProjects();
+  const projects = await getPublishedProjects();
   return projects.map((project) => ({
     slug: project.slug,
   }));

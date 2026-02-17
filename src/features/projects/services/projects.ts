@@ -1,33 +1,100 @@
 import { createStaticClient } from "@/lib/supabase/static";
-import { Project } from "@/features/projects/types";
+import { ProjectWithTechnologies } from "@/features/projects/types";
 
-export const getProjects = async () => {
+// Helper type for the raw Supabase response with joined technologies
+type HelperProjectResponse = {
+  id: string;
+  title: string;
+  slug: string;
+  thumbnail: string | null;
+  thumbnail_url: string | null;
+  thumbnail_path: string | null;
+  summary: string | null;
+  problem: string | null;
+  solution: string | null;
+  architecture: string | null;
+  result: string | null;
+  learnings: string | null;
+  status: "draft" | "published";
+  live_url: string | null;
+  repo_url: string | null;
+  is_featured: boolean;
+  published_at: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  project_technologies: {
+    technology: {
+      id: string;
+      name: string;
+    } | null;
+  }[];
+};
+
+export const getPublishedProjects = async () => {
   const supabase = createStaticClient();
   const { data: projects, error } = await supabase
     .from("projects")
-    .select("*")
+    .select(
+      `
+      *,
+      project_technologies (
+        technology:technologies (
+          id,
+          name
+        )
+      )
+    `,
+    )
     .eq("status", "published")
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .returns<Project[]>();
+    .order("published_at", { ascending: false })
+    .returns<HelperProjectResponse[]>();
 
   if (error) throw new Error(`Supabase error: ${error.message}`);
-  return projects || [];
+
+  // Transform to match ProjectWithTechnologies
+  return (projects || []).map((p) => ({
+    ...p,
+    technologies: p.project_technologies
+      .map((pt) => pt.technology)
+      .filter((t): t is { id: string; name: string } => t !== null),
+  })) as ProjectWithTechnologies[];
 };
 
 export const getFeaturedProjects = async (limit = 3) => {
   const supabase = createStaticClient();
   const { data: projects, error } = await supabase
     .from("projects")
-    .select("*")
+    .select(
+      `
+      *,
+      project_technologies (
+        technology:technologies (
+          id,
+          name
+        )
+      )
+    `,
+    )
+    .eq("is_featured", true)
     .eq("status", "published")
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
     .limit(limit)
-    .returns<Project[]>();
+    .returns<HelperProjectResponse[]>();
 
   if (error) throw new Error(`Supabase error: ${error.message}`);
-  return projects || [];
+
+  // Transform to match ProjectWithTechnologies
+  return (projects || []).map((p) => ({
+    ...p,
+    technologies: p.project_technologies
+      .map((pt) => pt.technology)
+      .filter((t): t is { id: string; name: string } => t !== null),
+  })) as ProjectWithTechnologies[];
 };
 
 export const getProjectBySlug = async (slug: string) => {
@@ -35,13 +102,28 @@ export const getProjectBySlug = async (slug: string) => {
   const { data: project, error } = await supabase
     .from("projects")
     .select(
-      "id, title, slug, summary, content, thumbnail, demo_url, repo_url, tech_stack, created_at, updated_at",
+      `
+      *,
+      project_technologies (
+        technology:technologies (
+          id,
+          name
+        )
+      )
+    `,
     )
     .eq("slug", slug)
     .eq("status", "published")
     .is("deleted_at", null)
-    .single<Project>();
+    .single<HelperProjectResponse>();
 
-  if (error) return null;
-  return project;
+  if (error || !project) return null;
+
+  // Transform to match ProjectWithTechnologies
+  return {
+    ...project,
+    technologies: project.project_technologies
+      .map((pt) => pt.technology)
+      .filter((t): t is { id: string; name: string } => t !== null),
+  } as ProjectWithTechnologies;
 };

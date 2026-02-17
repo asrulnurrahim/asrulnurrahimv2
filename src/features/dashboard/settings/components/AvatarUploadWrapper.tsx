@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@supabase/supabase-js";
-import AvatarUpload from "./AvatarUpload";
+import AvatarUpload from "../forms/AvatarUpload";
 import { useRouter } from "next/navigation";
 
 interface AvatarUploadWrapperProps {

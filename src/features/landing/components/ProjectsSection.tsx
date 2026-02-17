@@ -50,17 +50,17 @@ export async function ProjectsSection() {
               <div className="flex flex-1 flex-col p-6">
                 {/* Tech Stack */}
                 <div className="mb-4 flex flex-wrap gap-2">
-                  {project.tech_stack?.slice(0, 3).map((tech) => (
+                  {project.technologies?.slice(0, 3).map((tech) => (
                     <span
-                      key={tech}
+                      key={tech.name}
                       className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
                     >
-                      {tech}
+                      {tech.name}
                     </span>
                   ))}
-                  {(project.tech_stack?.length || 0) > 3 && (
+                  {(project.technologies?.length || 0) > 3 && (
                     <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                      +{project.tech_stack!.length - 3}
+                      +{project.technologies!.length - 3}
                     </span>
                   )}
                 </div>

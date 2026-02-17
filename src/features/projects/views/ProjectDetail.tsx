@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { getProjectThumbnailUrl } from "../utils/storage";
 
 interface ProjectDetailProps {
   slug: string;
@@ -20,7 +21,7 @@ export default async function ProjectDetail({ slug }: ProjectDetailProps) {
     "@type": "SoftwareSourceCode",
     name: project.title,
     description: project.summary,
-    programmingLanguage: project.tech_stack || [],
+    programmingLanguage: project.technologies?.map((t) => t.name) || [],
     author: {
       "@type": "Person",
       name: "Asrul Nur Rahim",
@@ -53,28 +54,34 @@ export default async function ProjectDetail({ slug }: ProjectDetailProps) {
           </p>
 
           <div className="mb-8 flex flex-wrap gap-2">
-            {project.tech_stack?.map((tech) => (
+            {project.technologies?.map((tech) => (
               <span
-                key={tech}
+                key={tech.name}
                 className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300"
               >
-                {tech}
+                {tech.name}
               </span>
             ))}
           </div>
         </header>
 
         <div className="relative mb-16 flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-200 shadow-sm dark:bg-slate-900">
-          {project.thumbnail_url ? (
-            <Image
-              src={project.thumbnail_url}
-              alt={project.title}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <span className="text-6xl opacity-20">🚀</span>
-          )}
+          {(() => {
+            const thumbnailUrl = getProjectThumbnailUrl(
+              project.thumbnail,
+              project.thumbnail_path,
+            );
+            return thumbnailUrl ? (
+              <Image
+                src={thumbnailUrl}
+                alt={project.title}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <span className="text-6xl opacity-20">🚀</span>
+            );
+          })()}
         </div>
 
         <div className="grid gap-12 md:grid-cols-3">

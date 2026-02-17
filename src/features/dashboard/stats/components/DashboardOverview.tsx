@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { getDashboardStats } from "../services";
+import { getDashboardStats } from "../services/stats";
 import { DashboardStats } from "./DashboardStats";
 
 export async function DashboardOverview() {

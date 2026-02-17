@@ -36,27 +36,12 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/static") ||
     request.nextUrl.pathname.includes(".")
   ) {
-    return supabaseResponse;
+    return { supabaseResponse, user: null };
   }
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === "/login";
-  const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
-
-  if (!user && isDashboard) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isLoginPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  return supabaseResponse;
+  return { supabaseResponse, user };
 }

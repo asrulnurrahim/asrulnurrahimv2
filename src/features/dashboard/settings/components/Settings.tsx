@@ -1,6 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import { Profile } from "@/lib/types";
-import SettingsTabsComponent from "../components/settings/SettingsTabs";
+import SettingsTabsComponent from "./SettingsTabs";
 
 interface SettingsProps {
   user: User;
