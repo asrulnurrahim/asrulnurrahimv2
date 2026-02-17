@@ -25,7 +25,7 @@ export default function SettingsTabs({ user, profile }: SettingsTabsProps) {
   return (
     <div className="col-span-12">
       <div className="card mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="card-body px-6 !py-0">
+        <div className="card-body px-6 py-0!">
           <ul className="nav-tabs flex w-full flex-wrap border-b border-gray-200 text-center font-medium dark:border-gray-800">
             <li className="group">
               <button

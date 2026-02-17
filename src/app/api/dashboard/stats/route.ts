@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDashboardStats } from "@/features/dashboard/services";
+import { getDashboardStats } from "@/features/dashboard/stats/services/stats";
 
 export const dynamic = "force-dynamic";
 
