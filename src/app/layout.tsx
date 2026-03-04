@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { Plus_Jakarta_Sans, DM_Serif_Display } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -115,6 +116,7 @@ export default async function RootLayout({
           <ClientLayout>{children}</ClientLayout>
         </Providers>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
