@@ -1,14 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserMenu } from "@/components/shell/UserMenu";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks: { href: string; label: string; external?: boolean }[] = [
     { href: "/about", label: "About" },
@@ -22,7 +33,14 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white/75 shadow-[0_0_24px_rgba(27,46,94,.05)] backdrop-blur transition-colors dark:bg-slate-900/75 dark:shadow-[0_0_24px_rgba(27,46,94,.05)]">
+    <nav
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-300",
+        isScrolled
+          ? "bg-white/95 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:bg-slate-900/95 dark:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.4)]"
+          : "bg-[#edf2fc] shadow-none dark:bg-[#020817]",
+      )}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site-config";
 import Link from "next/link";
 import Image from "next/image";
 import { getProjectThumbnailUrl } from "../utils/storage";
+import { ProjectPlaceholder } from "../components/ProjectPlaceholder";
 
 export default async function ProjectList() {
   const projects = await getPublishedProjects();
@@ -59,9 +60,7 @@ export default async function ProjectList() {
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-blue-500/5 to-purple-500/5 text-gray-400 transition-transform duration-500 group-hover:scale-105 dark:text-gray-600">
-                      <span className="text-5xl opacity-20">🚀</span>
-                    </div>
+                    <ProjectPlaceholder />
                   );
                 })()}
               </div>

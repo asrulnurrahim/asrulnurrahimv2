@@ -4,11 +4,18 @@ import ClientLayout from "@/components/shell/ClientLayout";
 import { Providers } from "@/app/providers";
 import { cookies } from "next/headers";
 import "./globals.css";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, DM_Serif_Display } from "next/font/google";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-jakarta",
+  display: "swap",
+});
+
+const dmSerif = DM_Serif_Display({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--font-dm-serif",
   display: "swap",
 });
 
@@ -98,7 +105,10 @@ export default async function RootLayout({
   const theme = cookieStore.get("theme")?.value || "light";
 
   return (
-    <html lang="en" className={`${theme} ${jakarta.variable}`}>
+    <html
+      lang="en"
+      className={`${theme} ${jakarta.variable} ${dmSerif.variable}`}
+    >
       <body className="font-default text-text-default antialiased">
         <Providers defaultTheme={theme}>
           <ClientLayout>{children}</ClientLayout>

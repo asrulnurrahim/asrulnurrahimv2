@@ -16,21 +16,32 @@ export default function ArticleContent({ content }: ArticleContentProps) {
 
     // Find all code block wrappers
     const codeBlocks = containerRef.current.querySelectorAll(".code-block");
+    const roots: ReturnType<typeof createRoot>[] = [];
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
 
     codeBlocks.forEach((block) => {
       const placeholder = block.querySelector(".copy-btn-placeholder");
       if (!placeholder) return;
 
-      // Prevent double injection
-      if (placeholder.hasChildNodes()) return;
-
       // Find the code content for copying
       const codeElement = block.querySelector("code");
       const codeText = codeElement ? codeElement.innerText : "";
 
-      const root = createRoot(placeholder);
-      root.render(<CopyButton text={codeText} />);
+      // Delay creation slightly to handle Strict Mode double-invocation
+      const timeoutId = setTimeout(() => {
+        const root = createRoot(placeholder);
+        root.render(<CopyButton text={codeText} />);
+        roots.push(root);
+      }, 0);
+      timeouts.push(timeoutId);
     });
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+      roots.forEach((root) => {
+        setTimeout(() => root.unmount(), 0);
+      });
+    };
   }, [content]);
 
   return (
@@ -54,7 +65,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1.5 text-xs font-semibold text-gray-300 transition-colors hover:text-white"
+      className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-gray-300 transition-colors hover:text-white"
       aria-label="Copy code"
     >
       {copied ? (

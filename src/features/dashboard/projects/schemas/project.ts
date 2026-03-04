@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const projectSchema = z.object({
+export const projectFormSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
@@ -42,4 +42,10 @@ export const projectSchema = z.object({
   seo_description: z.string().max(160).optional().or(z.literal("")),
 });
 
-export type ProjectFormValues = z.infer<typeof projectSchema>;
+export const projectDbSchema = projectFormSchema.omit({
+  thumbnail: true,
+  technologies: true,
+});
+
+export type ProjectFormValues = z.infer<typeof projectFormSchema>;
+export type ProjectDbValues = z.infer<typeof projectDbSchema>;

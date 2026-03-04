@@ -8,19 +8,19 @@ import {
   Search,
   Globe,
   ChevronRight,
+  Mail,
 } from "lucide-react";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "About Me - Front-End Developer & UI Specialist",
-  description:
-    "Experienced Front-End Developer with a focus on visual perfection, performance optimization, and SEO.",
-  metadataBase: new URL("https://asrulnurrahim.com"),
+  title: `About Me - ${siteConfig.author}`,
+  description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
   openGraph: {
-    title: "About Me - Front-End Developer & UI Specialist",
-    description:
-      "Building clean, precise, and visually consistent web interfaces with a focus on performance and SEO.",
+    title: `About Me - ${siteConfig.author}`,
+    description: siteConfig.description,
     type: "profile",
-    images: ["/images/og-about.jpg"], // Update with actual OG image if available
+    images: [siteConfig.ogImage],
   },
   alternates: {
     canonical: "/about",
@@ -31,15 +31,14 @@ export default function AboutPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "Asrul Nur Rahim",
+    name: siteConfig.author,
     jobTitle: "Front-End Developer",
-    description:
-      "Front-End Developer with strong visual skills and high attention to detail.",
-    url: "https://asrulnurrahim.com/about", // Adjust based on actual domain
+    description: siteConfig.description,
+    url: `${siteConfig.url}/about`,
     sameAs: [
-      "https://github.com/asrulnurrahim",
-      "https://linkedin.com/in/asrulnurrahim",
-      // Add other social links
+      siteConfig.links.github,
+      siteConfig.links.linkedin,
+      siteConfig.links.twitter,
     ],
   };
 
@@ -133,27 +132,19 @@ export default function AboutPage() {
           <div className="ml-3 space-y-12 border-l-2 border-gray-200 pl-8 md:ml-0 md:pl-0 dark:border-gray-800">
             {/* Experience Item 1 */}
             <ExperienceItem
-              role="Senior Front-End Developer"
-              company="Tech Company Inc."
-              period="2023 - Present"
-              description="Leading the frontend architecture migration to Next.js 14+. Improved LCP by 40% and established a comprehensive design system."
-              tags={["Next.js", "React", "TypeScript", "Tailwind"]}
+              role="Senior Front-End Engineer"
+              company="Gadjian (PT Gadjian Indonesia)"
+              period="2022 - Present"
+              description="Leading front-end development for HRIS and payroll systems. Focused on building scalable UI architectures, optimizing application performance, and maintaining pixel-perfect consistency across complex dashboards."
+              tags={["Next.js", "React", "TypeScript", "Tailwind CSS", "PHP"]}
             />
             {/* Experience Item 2 */}
             <ExperienceItem
               role="Front-End Developer"
-              company="Creative Agency"
-              period="2021 - 2023"
-              description="Developed high-converting landing pages and complex web applications. Collaborated closely with designers to ensure visual fidelity."
-              tags={["Vue.js", "GSAP", "SCSS", "Webpack"]}
-            />
-            {/* Experience Item 3 */}
-            <ExperienceItem
-              role="Web Developer"
-              company="Freelance"
-              period="2019 - 2021"
-              description="Delivered custom websites for diverse clients. Focused on responsive design, CMS integration, and SEO optimization."
-              tags={["HTML/CSS", "JavaScript", "WordPress", "PHP"]}
+              company="Freelance / Self-Employed"
+              period="2020 - 2022"
+              description="Developed various web applications and landing pages for clients. Specialized in creating responsive, accessible, and SEO-optimized sites with a strong focus on user experience and visual fidelity."
+              tags={["React", "JavaScript", "Tailwind CSS", "WordPress"]}
             />
           </div>
         </div>
@@ -170,7 +161,7 @@ export default function AboutPage() {
             opportunities to be part of your visions.
           </p>
           <a
-            href="mailto:contact@asrulnurrahim.com"
+            href={`mailto:${siteConfig.contact.email}`}
             className="inline-flex items-center rounded-full bg-blue-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-blue-700"
           >
             Get in Touch <ChevronRight className="ml-2 h-4 w-4" />

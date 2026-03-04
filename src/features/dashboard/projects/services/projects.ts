@@ -1,5 +1,8 @@
 import "server-only";
-import { ProjectFormValues } from "@/features/dashboard/projects/schemas/project";
+import {
+  ProjectFormValues,
+  projectDbSchema,
+} from "@/features/dashboard/projects/schemas/project";
 import { createClient } from "@/lib/supabase/server";
 import { ProjectWithTechnologies, Technology } from "@/features/projects/types";
 
@@ -20,6 +23,53 @@ export const getAllTechnologies = async (): Promise<Technology[]> => {
   }
 
   return data || [];
+};
+
+/**
+ * Resolves a mix of UUIDs and technology names into an array of strictly UUIDs.
+ * It bulk-queries existing names and bulk-inserts new names to avoid N+1 queries.
+ */
+const resolveTechnologies = async (
+  technologies: string[],
+): Promise<string[]> => {
+  if (!technologies || technologies.length === 0) return [];
+  const supabase = await createClient();
+
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  const existingIds = technologies.filter((t) => uuidRegex.test(t));
+  const newNames = technologies.filter((t) => !uuidRegex.test(t));
+
+  if (newNames.length === 0) {
+    return existingIds;
+  }
+
+  // Find existing technologies by name in one query
+  const { data: existingTechs } = await supabase
+    .from("technologies")
+    .select("id, name")
+    .in("name", newNames);
+
+  const foundNames = existingTechs?.map((t) => t.name) || [];
+  const foundIds = existingTechs?.map((t) => t.id) || [];
+
+  const namesToCreate = newNames.filter((name) => !foundNames.includes(name));
+
+  let createdIds: string[] = [];
+  if (namesToCreate.length > 0) {
+    // Bulk insert new technologies
+    const { data: newTechs, error } = await supabase
+      .from("technologies")
+      .insert(namesToCreate.map((name) => ({ name })))
+      .select("id");
+
+    if (error)
+      throw new Error(`Failed to create technologies: ${error.message}`);
+    createdIds = newTechs?.map((t) => t.id) || [];
+  }
+
+  return [...existingIds, ...foundIds, ...createdIds];
 };
 
 // Helper type for the raw Supabase response with joined technologies
@@ -133,9 +183,11 @@ export const getAdminProjectById = async (id: string) => {
 // Admin: Create Project
 export const createProjectService = async (data: ProjectFormValues) => {
   const supabase = await createClient();
-  const { technologies, ...projectData } = data;
+  // 1. Validate and construct database payload safely
+  const projectData = projectDbSchema.parse(data);
+  const { technologies } = data;
 
-  // 1. Insert Project
+  // 2. Insert Project
   const { data: project, error } = await supabase
     .from("projects")
     .insert([
@@ -152,48 +204,7 @@ export const createProjectService = async (data: ProjectFormValues) => {
 
   // 2. Handle Technologies (Many-to-Many)
   if (technologies && technologies.length > 0) {
-    // We assume technologies array contains IDs.
-    // If we support creating new technologies on the fly, logic would be more complex.
-    // For now, let's assume UI handles ID selection or creation separately.
-    // Ideally, the UI should pass IDs. If names are passed, we need to resolve/create them.
-    // Given the schema accepts string array, verify if they are IDs or Names.
-    // The validation schema says array(string). Let's assume IDs for relation linking.
-
-    // If the UI passes names, we'd need to upsert technologies first.
-    // Let's implement robust handling: check if string is UUID -> ID, else -> Name (create if not exists)
-
-    const techIds: string[] = [];
-
-    for (const tech of technologies) {
-      if (
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          tech,
-        )
-      ) {
-        // It's a UUID, assume it's an existing ID
-        techIds.push(tech);
-      } else {
-        // It's a name, find or create
-        const { data: existing } = await supabase
-          .from("technologies")
-          .select("id")
-          .eq("name", tech)
-          .single();
-
-        if (existing) {
-          techIds.push(existing.id);
-        } else {
-          const { data: newTech, error: createError } = await supabase
-            .from("technologies")
-            .insert([{ name: tech }])
-            .select("id")
-            .single();
-
-          if (createError) throw new Error(createError.message);
-          techIds.push(newTech.id);
-        }
-      }
-    }
+    const techIds = await resolveTechnologies(technologies);
 
     if (techIds.length > 0) {
       const relationData = techIds.map((techId) => ({
@@ -222,9 +233,11 @@ export const updateProjectService = async (
   data: Partial<ProjectFormValues>,
 ) => {
   const supabase = await createClient();
-  const { technologies, ...projectData } = data;
+  // 1. Validate and construct database payload safely
+  const projectData = projectDbSchema.parse(data);
+  const { technologies } = data;
 
-  // 1. Update Project Fields
+  // 2. Update Project Fields
   const { data: project, error } = await supabase
     .from("projects")
     .update({
@@ -249,37 +262,8 @@ export const updateProjectService = async (
 
     if (delError) throw new Error(delError.message);
 
-    // Insert new ones (Logic similar to create)
-    const techIds: string[] = [];
-
-    for (const tech of technologies) {
-      if (
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          tech,
-        )
-      ) {
-        techIds.push(tech);
-      } else {
-        const { data: existing } = await supabase
-          .from("technologies")
-          .select("id")
-          .eq("name", tech)
-          .single();
-
-        if (existing) {
-          techIds.push(existing.id);
-        } else {
-          const { data: newTech, error: createError } = await supabase
-            .from("technologies")
-            .insert([{ name: tech }])
-            .select("id")
-            .single();
-
-          if (createError) throw new Error(createError.message);
-          techIds.push(newTech.id);
-        }
-      }
-    }
+    // Insert new ones efficiently
+    const techIds = await resolveTechnologies(technologies);
 
     if (techIds.length > 0) {
       const relationData = techIds.map((techId) => ({

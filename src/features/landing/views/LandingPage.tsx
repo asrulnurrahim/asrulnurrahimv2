@@ -26,8 +26,13 @@ export async function LandingPage() {
       jobTitle: "Front-End Engineer",
       url: siteConfig.url,
       sameAs: [
-        "https://github.com/asrulnurrahim",
-        "https://linkedin.com/in/asrulnurrahim",
+        siteConfig.links.github,
+        siteConfig.links.linkedin,
+        siteConfig.links.twitter,
+        siteConfig.links.instagram,
+        siteConfig.links.facebook,
+        siteConfig.links.youtube,
+        siteConfig.links.tiktok,
       ],
     },
   };

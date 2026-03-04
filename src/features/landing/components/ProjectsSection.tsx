@@ -15,7 +15,7 @@ export async function ProjectsSection() {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+          <h2 className="mb-4 text-3xl tracking-tight sm:text-4xl dark:text-white">
             Selected Work
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-400">

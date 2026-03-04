@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { getProjectThumbnailUrl } from "../utils/storage";
+import { ProjectPlaceholder } from "../components/ProjectPlaceholder";
 
 interface ProjectDetailProps {
   slug: string;
@@ -79,7 +80,7 @@ export default async function ProjectDetail({ slug }: ProjectDetailProps) {
                 className="object-cover"
               />
             ) : (
-              <span className="text-6xl opacity-20">🚀</span>
+              <ProjectPlaceholder />
             );
           })()}
         </div>
@@ -91,9 +92,10 @@ export default async function ProjectDetail({ slug }: ProjectDetailProps) {
                 <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                   The Problem
                 </h2>
-                <div className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                  {project.problem}
-                </div>
+                <div
+                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400"
+                  dangerouslySetInnerHTML={{ __html: project.problem }}
+                />
               </section>
             )}
             {project.solution && (
@@ -101,13 +103,38 @@ export default async function ProjectDetail({ slug }: ProjectDetailProps) {
                 <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                   The Solution
                 </h2>
-                <div className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                  {project.solution}
-                </div>
+                <div
+                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400"
+                  dangerouslySetInnerHTML={{ __html: project.solution }}
+                />
               </section>
             )}
           </div>
           <div className="space-y-8">
+            {project.result && (
+              <section className="rounded-2xl border border-blue-100 bg-blue-50/50 p-6 dark:border-blue-900/30 dark:bg-blue-900/10">
+                <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-blue-200">
+                  The Result
+                </h3>
+                <div
+                  className="prose dark:prose-invert prose-blue max-w-none text-gray-700 dark:text-gray-300"
+                  dangerouslySetInnerHTML={{ __html: project.result }}
+                />
+              </section>
+            )}
+
+            {project.learnings && (
+              <section className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-6 dark:border-emerald-900/30 dark:bg-emerald-900/10">
+                <h3 className="mb-4 text-xl font-bold text-emerald-900 dark:text-emerald-200">
+                  Key Learnings
+                </h3>
+                <div
+                  className="prose dark:prose-invert prose-emerald max-w-none text-gray-700 dark:text-gray-300"
+                  dangerouslySetInnerHTML={{ __html: project.learnings }}
+                />
+              </section>
+            )}
+
             <div className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-gray-800 dark:bg-slate-900">
               <h3 className="mb-4 font-bold text-gray-900 dark:text-white">
                 Project Info

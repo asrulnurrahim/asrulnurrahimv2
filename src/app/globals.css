@@ -34,8 +34,9 @@
   --themedark-border: #303f50;
 
   /* Typography Settings */
-  --color-text-default: #202124;
+  --color-text-default: #343f52;
   --font-family-text: var(--font-jakarta), sans-serif;
+  --font-family-serif: var(--font-dm-serif), serif;
 
   /* Map default sans to new font */
   --font-family-sans: var(--font-family-text);
@@ -123,7 +124,16 @@
   }
 
   h1,
-  h2,
+  h2 {
+    font-family: var(--font-family-serif);
+    color: var(--color-text-default);
+  }
+  h1 {
+    span {
+      font-family: var(--font-family-serif);
+    }
+  }
+
   h3,
   h4,
   h5,
@@ -164,9 +174,16 @@
     box-shadow: var(--border-transparent-color) 0 1px;
   }
 
+  .bg-gradient-primary {
+    background: linear-gradient(180deg, #edf2fc, rgba(255, 255, 255, 0) 100%);
+  }
+
   body {
     background-color: var(--background);
     color: var(--color-text-default);
+    font-family: var(--font-jakarta);
+    /* font-size: 18px; */
+    line-height: 1.75;
     transition:
       background-color 0.3s ease,
       color 0.3s ease;

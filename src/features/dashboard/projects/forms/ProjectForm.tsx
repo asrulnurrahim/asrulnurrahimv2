@@ -13,7 +13,7 @@ import {
 import { useTechnologies } from "../hooks/useTechnologies";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { projectSchema, ProjectFormValues } from "../schemas/project";
+import { projectFormSchema, ProjectFormValues } from "../schemas/project";
 import { uploadThumbnailAction } from "../actions/upload";
 
 // Ideally we should move EditorClient to a shared location, but consuming it from posts for now
@@ -44,7 +44,7 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
     watch,
     formState: { errors },
   } = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectSchema),
+    resolver: zodResolver(projectFormSchema),
     defaultValues: {
       title: project?.title || "",
       slug: project?.slug || "",
