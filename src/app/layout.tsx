@@ -5,6 +5,7 @@ import { Providers } from "@/app/providers";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { Plus_Jakarta_Sans, DM_Serif_Display } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -113,6 +114,7 @@ export default async function RootLayout({
         <Providers defaultTheme={theme}>
           <ClientLayout>{children}</ClientLayout>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
